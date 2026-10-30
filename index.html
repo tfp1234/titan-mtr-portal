@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Titan Flow Products Inc. - Mill Test Report (MTR) Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @media print {
+      body * { visibility: hidden; }
+      #printable-area, #printable-area * { visibility: visible; }
+      #printable-area { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+      .no-print { display: none !important; }
+    }
+  </style>
+</head>
+<body class="bg-gray-100 font-sans min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-[#1B365D] text-white shadow-md no-print">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex flex-wrap justify-between items-center">
+      <div class="flex items-center space-x-4">
+        <!-- Titan Flow Products Logo SVG -->
+        <div class="bg-white p-2 rounded shadow-sm flex items-center justify-center">
+          <svg class="h-10 w-auto" viewBox="0 0 200 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <text x="5" y="45" font-family="Arial, sans-serif" font-weight="900" font-size="48" fill="#1B365D" letter-spacing="-2">T</text>
+            <text x="32" y="45" font-family="Arial, sans-serif" font-weight="900" font-size="48" fill="#0056B3" letter-spacing="-2">P</text>
+            <text x="5" y="65" font-family="Arial, sans-serif" font-weight="bold" font-size="16" fill="#1B365D">Titan</text>
+            <text x="5" y="77" font-family="Arial, sans-serif" font-weight="bold" font-size="9" fill="#0056B3" letter-spacing="0.5">FLOW PRODUCTS</text>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-wide">TITAN FLOW PRODUCTS INC.</h1>
+          <p class="text-xs text-gray-300">Certified Material Test Report (MTR) Self-Service Portal</p>
+        </div>
+      </div>
+      <div class="text-right text-xs text-gray-200 mt-2 sm:mt-0">
+        <p class="font-semibold">8524 Roper Road NW, Edmonton, AB T6E 6V4</p>
+        <p>PH: (587) 410-8373 | Mon - Fri: 8:00 AM – 5:00 PM</p>
+        <button onclick="toggleAdminModal()" class="mt-1 text-xs bg-blue-800 hover:bg-blue-700 text-white px-3 py-1 rounded shadow transition">Staff Access</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-5xl mx-auto w-full px-4 py-8 flex-grow">
+    
+    <!-- Search Box -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8 no-print border-t-4 border-[#1B365D]">
+      <h2 class="text-lg font-bold text-[#1B365D] mb-2">Search Material Test Reports</h2>
+      <p class="text-sm text-gray-600 mb-4">Enter the <strong>Heat Code</strong> stamped on your fitting or component to pull up the certified Mill Test Report.</p>
+      
+      <div class="flex flex-col sm:flex-row gap-3">
+        <input type="text" id="searchInput" placeholder="Enter Heat # (e.g. 032A, 424)..." class="flex-grow border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600">
+        <button onclick="performSearch()" class="bg-[#1B365D] hover:bg-blue-900 text-white font-semibold px-6 py-2 rounded transition">Search MTR</button>
+      </div>
+      
+      <div class="mt-3 text-xs text-gray-500">
+        <span>Sample Heat Codes to Test: </span>
+        <button onclick="quickSearch('032A')" class="underline hover:text-blue-700 font-mono">032A</button>, 
+        <button onclick="quickSearch('424')" class="underline hover:text-blue-700 font-mono">424</button>
+      </div>
+    </div>
+
+    <!-- Multi-Item Selector -->
+    <div id="selectionContainer" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 no-print">
+      <h3 class="text-sm font-bold text-[#1B365D] mb-1">Multiple Products Found for Heat <span id="selHeatNum" class="font-mono"></span></h3>
+      <p class="text-xs text-gray-600 mb-3">Please select the specific product description matching your component:</p>
+      <div id="itemList" class="space-y-2"></div>
+    </div>
+
+    <!-- Search Results / PDF Viewer Container -->
+    <div id="resultsContainer" class="hidden">
+      
+      <!-- Custom Description Tool (No Print) -->
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 no-print">
+        <h3 class="text-sm font-bold text-[#1B365D] mb-1">Custom Customer Line Item Description (Optional)</h3>
+        <p class="text-xs text-gray-600 mb-2">Need to add your internal tag or line description for project paperwork? Type it below before printing/saving.</p>
+        <input type="text" id="customDescInput" oninput="updateCustomDesc()" placeholder="e.g. Line 4B Booster Station - Tag #V-102 / PO #9042" class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm">
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex justify-between items-center mb-4 no-print">
+        <h2 class="text-xl font-bold text-gray-800">Official Mill Test Report Document</h2>
+        <button onclick="window.print()" class="bg-green-700 hover:bg-green-800 text-white font-semibold px-4 py-2 rounded shadow text-sm transition">Print / Save PDF with Cover</button>
+      </div>
+
+      <!-- Printable Area -->
+      <div id="printable-area" class="bg-white p-6 rounded-lg shadow border border-gray-200">
+        
+        <!-- Cover Page / Header Stamp -->
+        <div class="border-b pb-4 mb-4">
+          <div class="flex justify-between items-center">
+            <div>
+              <h2 class="text-xl font-bold text-[#1B365D]">TITAN FLOW PRODUCTS INC.</h2>
+              <p class="text-xs text-gray-600">8524 Roper Road NW, Edmonton, AB T6E 6V4 | PH: (587) 410-8373</p>
+            </div>
+            <div class="text-right">
+              <span class="inline-block bg-blue-100 text-blue-900 text-xs px-2 py-1 rounded font-bold uppercase">Verified Self-Service Portal</span>
+              <p class="text-xs text-gray-500 mt-1" id="printDate"></p>
+            </div>
+          </div>
+
+          <div class="mt-3 text-xs text-gray-700">
+            <p><strong>Selected Product:</strong> <span id="displayProductDesc" class="font-semibold text-blue-900"></span></p>
+          </div>
+
+          <!-- Custom Description Stamp Box -->
+          <div id="customDescDisplayBox" class="hidden mt-3 bg-yellow-50 border border-yellow-300 p-2.5 rounded">
+            <p class="text-[10px] font-bold text-yellow-900 uppercase tracking-wider">Customer Custom Line Item Tag:</p>
+            <p id="resCustomDesc" class="text-xs font-semibold text-gray-800 mt-0.5"></p>
+          </div>
+        </div>
+
+        <!-- Embedded Original Mill PDF Viewer -->
+        <div class="w-full">
+          <embed id="pdfViewerEmbed" src="" type="application/pdf" width="100%" height="700px" class="border border-gray-300 rounded">
+        </div>
+
+        <!-- Audit Disclaimer Footer -->
+        <div class="mt-4 border-t pt-3 text-[11px] text-gray-500">
+          <p><strong>Audit Notice:</strong> Official mill test results and signatures remain as certified by original manufacturer. Custom line descriptions are added per customer request for internal tracking via www.titanflowproducts.com.</p>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- No Results Box -->
+    <div id="noResults" class="hidden bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-lg p-6 text-center">
+      <p class="font-bold">No MTR PDF found for that Heat Code.</p>
+      <p class="text-sm mt-1">Please verify the heat number stamped on your component or contact Titan Flow Products at <strong>(587) 410-8373</strong>.</p>
+    </div>
+
+  </main>
+
+  <!-- Staff Admin Modal -->
+  <div id="adminModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 no-print">
+    <div class="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+      <h3 class="text-lg font-bold text-[#1B365D] mb-4">Staff Portal Access</h3>
+      <div id="adminAuth">
+        <p class="text-sm text-gray-600 mb-3">Enter staff passcode to access management controls:</p>
+        <input type="password" id="adminPass" placeholder="Enter staff passcode..." class="w-full border rounded px-3 py-2 mb-4 text-sm">
+        <div class="flex justify-end space-x-2">
+          <button onclick="toggleAdminModal()" class="px-4 py-2 text-sm text-gray-600">Cancel</button>
+          <button onclick="checkAdminPass()" class="bg-[#1B365D] text-white px-4 py-2 rounded text-sm">Log In</button>
+        </div>
+      </div>
+      <div id="adminControls" class="hidden">
+        <p class="text-sm font-semibold text-green-700 mb-2">✓ Authenticated as Staff Administrator</p>
+        <p class="text-xs text-gray-600 mb-4">Your descriptive PDF files (with spaces and descriptions) are fully supported and automatically encoded for web retrieval.</p>
+        <button onclick="toggleAdminModal()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded text-sm font-semibold">Close Panel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search & Logic Script -->
+  <script>
+    // Exact filenames with spaces and descriptions mapped directly
+    const mtrFilesDatabase = {
+      "032A": [
+        { desc: '90 NPT ELBOW 1/2" 2M A/SA105N', file: '032A .50 2M 90 ELBOW A105N.pdf' },
+        { desc: 'NPT TEE 1/2" 2M A/SA105N', file: '032A .50 2M TEE A105N.pdf' }
+      ],
+      "424": [
+        { desc: '3" X 2" XXH A420 WPL6 CONC SWG TBE', file: '424.pdf' }
+      ]
+    };
+
+    function quickSearch(val) {
+      document.getElementById('searchInput').value = val;
+      performSearch();
+    }
+
+    function performSearch() {
+      const input = document.getElementById('searchInput').value.trim().toUpperCase();
+      const resBox = document.getElementById('resultsContainer');
+      const selBox = document.getElementById('selectionContainer');
+      const noResBox = document.getElementById('noResults');
+
+      resBox.classList.add('hidden');
+      selBox.classList.add('hidden');
+      noResBox.classList.add('hidden');
+
+      if (!input || !mtrFilesDatabase[input]) {
+        noResBox.classList.remove('hidden');
+        return;
+      }
+
+      const records = mtrFilesDatabase[input];
+
+      if (records.length === 1) {
+        loadPdfRecord(records[0]);
+      } else {
+        document.getElementById('selHeatNum').innerText = input;
+        let listHtml = '';
+        records.forEach((rec, idx) => {
+          listHtml += `<button onclick="loadPdfRecord(mtrFilesDatabase['${input}'][${idx}])" class="w-full text-left bg-white hover:bg-blue-100 border border-blue-200 p-2.5 rounded text-xs font-semibold text-blue-900 transition flex justify-between items-center">
+            <span>${rec.desc}</span>
+            <span class="text-gray-500 font-mono text-[10px]">Select PDF →</span>
+          </button>`;
+        });
+        document.getElementById('itemList').innerHTML = listHtml;
+        selBox.classList.main ? selBox.classList.remove('hidden') : selBox.classList.remove('hidden');
+        selBox.classList.remove('hidden');
+      }
+    }
+
+    function loadPdfRecord(rec) {
+      document.getElementById('selectionContainer').classList.add('hidden');
+      document.getElementById('displayProductDesc').innerText = rec.desc;
+      
+      // encodeURIComponent ensures spaces and quotes in filenames load correctly on the web server
+      document.getElementById('pdfViewerEmbed').src = `pdfs/${encodeURIComponent(rec.file)}`;
+      
+      document.getElementById('printDate').innerText = "Issued: " + new Date().toLocaleDateString();
+      document.getElementById('resultsContainer').classList.remove('hidden');
+    }
+
+    function updateCustomDesc() {
+      const val = document.getElementById('customDescInput').value.trim();
+      const displayBox = document.getElementById('customDescDisplayBox');
+      const resCustom = document.getElementById('resCustomDesc');
+
+      if (val) {
+        resCustom.innerText = val;
+        displayBox.classList.remove('hidden');
+      } else {
+        displayBox.classList.add('hidden');
+      }
+    }
+
+    function toggleAdminModal() {
+      document.getElementById('adminModal').classList.toggle('hidden');
+    }
+
+    function checkAdminPass() {
+      if (document.getElementById('adminPass').value === 'Nipples8524!') {
+        document.getElementById('adminAuth').classList.add('hidden');
+        document.getElementById('adminControls').classList.remove('hidden');
+      } else {
+        alert('Incorrect Passcode');
+      }
+    }
+  </script>
+</body>
+</html>
