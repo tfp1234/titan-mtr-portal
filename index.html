@@ -64,9 +64,12 @@
 
     <!-- Search Results / PDF Viewer Container -->
     <div id="resultsContainer" class="hidden">
-      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 no-print">
-        <h3 class="text-sm font-bold text-[#1B365D] mb-1">Custom Customer Line Item Description (Optional)</h3>
-        <input type="text" id="customDescInput" oninput="updateCustomDesc()" placeholder="e.g. Line 4B Booster Station - Tag #V-102 / PO #9042" class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm">
+      
+      <!-- After-Hours Custom Override Box -->
+      <div class="bg-amber-50 border border-amber-300 rounded-lg p-4 mb-6 no-print shadow-sm">
+        <h3 class="text-sm font-bold text-amber-900 mb-1">⚠️ Missing an After-Hours Description?</h3>
+        <p class="text-xs text-amber-800 mb-2">If your exact part variation isn't listed, type your custom product description below. It will instantly appear on the printed document header:</p>
+        <input type="text" id="customDescInput" oninput="updateCustomDesc()" placeholder="e.g. Special order component / PO #9042 - Custom size configuration" class="w-full border border-amber-400 bg-white rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-600">
       </div>
 
       <div class="flex justify-between items-center mb-4 no-print">
@@ -93,13 +96,14 @@
             <p><strong>Selected Document:</strong> <span id="displayProductDesc" class="font-semibold text-blue-900"></span></p>
           </div>
 
-          <div id="customDescDisplayBox" class="hidden mt-3 bg-yellow-50 border border-yellow-300 p-2.5 rounded">
-            <p class="text-[10px] font-bold text-yellow-900 uppercase tracking-wider">Customer Custom Line Item Tag:</p>
-            <p id="resCustomDesc" class="text-xs font-semibold text-gray-800 mt-0.5"></p>
+          <!-- Printed Custom Override Tag -->
+          <div id="customDescDisplayBox" class="hidden mt-3 bg-yellow-100 border border-yellow-400 p-2.5 rounded">
+            <p class="text-[10px] font-bold text-yellow-900 uppercase tracking-wider">After-Hours Custom Product Description Override:</p>
+            <p id="resCustomDesc" class="text-sm font-bold text-gray-900 mt-0.5"></p>
           </div>
         </div>
 
-        <!-- iframe Viewer for reliable cross-browser rendering and printing -->
+        <!-- iframe Viewer -->
         <div class="w-full">
           <iframe id="pdfViewerIframe" src="" width="100%" height="750px" class="border border-gray-300 rounded"></iframe>
         </div>
