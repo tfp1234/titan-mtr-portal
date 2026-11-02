@@ -7,9 +7,9 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @media print {
-      body * { visibility: hidden; }
-      #printable-area, #printable-area * { visibility: visible; }
-      #printable-area { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+      body * { visibility: hidden !important; }
+      #printable-area, #printable-area * { visibility: visible !important; }
+      #printable-area { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; margin: 0 !important; padding: 20px !important; }
       .no-print { display: none !important; }
     }
   </style>
@@ -71,7 +71,9 @@
 
       <div class="flex justify-between items-center mb-4 no-print">
         <h2 class="text-xl font-bold text-gray-800">Official Mill Test Report Document</h2>
-        <button onclick="window.print()" class="bg-green-700 hover:bg-green-800 text-white font-semibold px-4 py-2 rounded shadow text-sm transition">Print / Save PDF with Cover</button>
+        <button onclick="triggerPrint()" class="bg-green-700 hover:bg-green-800 text-white font-semibold px-5 py-2.5 rounded shadow text-sm transition flex items-center gap-2">
+          🖨️ Print / Save PDF with Cover
+        </button>
       </div>
 
       <div id="printable-area" class="bg-white p-6 rounded-lg shadow border border-gray-200">
@@ -97,8 +99,9 @@
           </div>
         </div>
 
+        <!-- iframe Viewer for reliable cross-browser rendering and printing -->
         <div class="w-full">
-          <embed id="pdfViewerEmbed" src="" type="application/pdf" width="100%" height="700px" class="border border-gray-300 rounded">
+          <iframe id="pdfViewerIframe" src="" width="100%" height="750px" class="border border-gray-300 rounded"></iframe>
         </div>
 
         <div class="mt-4 border-t pt-3 text-[11px] text-gray-500">
@@ -128,7 +131,7 @@
       </div>
       <div id="adminControls" class="hidden">
         <p class="text-sm font-semibold text-green-700 mb-2">✓ Authenticated as Staff Administrator</p>
-        <p class="text-xs text-gray-600 mb-4">To add files, simply drop your descriptive PDF files into the <code>/pdfs/</code> folder on GitHub. They will automatically match when searched by heat code.</p>
+        <p class="text-xs text-gray-600 mb-4">To add files, simply drop your descriptive PDF files into the <code>/pdfs/</code> folder on GitHub and update your <code>mtr-list.json</code> file.</p>
         <button onclick="toggleAdminModal()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded text-sm font-semibold">Close Panel</button>
       </div>
     </div>
@@ -188,9 +191,13 @@
       document.getElementById('selectionContainer').classList.add('hidden');
       document.getElementById('noResults').classList.add('hidden');
       document.getElementById('displayProductDesc').innerText = label;
-      document.getElementById('pdfViewerEmbed').src = `pdfs/${encodeURIComponent(filename)}`;
+      document.getElementById('pdfViewerIframe').src = `pdfs/${encodeURIComponent(filename)}`;
       document.getElementById('printDate').innerText = "Issued: " + new Date().toLocaleDateString();
       document.getElementById('resultsContainer').classList.remove('hidden');
+    }
+
+    function triggerPrint() {
+      window.print();
     }
 
     function updateCustomDesc() {
