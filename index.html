@@ -9,7 +9,7 @@
     @media print {
       body * { visibility: hidden !important; }
       #printable-area, #printable-area * { visibility: visible !important; }
-      #printable-area { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+      #printable-area { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; margin: 0 !important; padding: 10px !important; }
       .no-print { display: none !important; }
       iframe { height: 1100px !important; border: none !important; overflow: visible !important; display: block !important; }
     }
@@ -51,7 +51,7 @@
       <p class="text-sm text-gray-600 mb-4">Enter the <strong>Heat Code</strong> stamped on your fitting or component to pull up the certified Mill Test Report.</p>
       
       <div class="flex flex-col sm:flex-row gap-3">
-        <input type="text" id="searchInput" placeholder="Enter Heat # (e.g. 032A)..." class="flex-grow border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600" onkeydown="if(event.key === 'Enter') performSearch()">
+        <input type="text" id="searchInput" placeholder="Enter Heat # (e.g. T663401)..." class="flex-grow border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600" onkeydown="if(event.key === 'Enter') performSearch()">
         <button onclick="performSearch()" class="bg-[#1B365D] hover:bg-blue-900 text-white font-semibold px-6 py-2 rounded transition">Search MTR</button>
       </div>
     </div>
@@ -65,6 +65,14 @@
 
     <!-- Search Results / PDF Viewer Container -->
     <div id="resultsContainer" class="hidden">
+      
+      <!-- Custom Line Item Description / PO Override Box -->
+      <div class="bg-amber-50 border-2 border-amber-400 rounded-lg p-4 mb-6 no-print shadow-md">
+        <h3 class="text-sm font-bold text-amber-900 mb-1">📝 Custom Line Item Description / PO Tag (Optional)</h3>
+        <p class="text-xs text-amber-800 mb-2">If you need a specific part description or PO tag on your printed document, type it below:</p>
+        <input type="text" id="customDescInput" oninput="updateCustomDesc()" placeholder="e.g. 2 X 6 S160 A106B BLK SMLS NPL TBE / PO #9042" class="w-full border-2 border-amber-500 bg-white rounded px-3 py-2 text-sm font-semibold text-gray-800 focus:outline-none">
+      </div>
+
       <div class="flex justify-between items-center mb-4 no-print">
         <h2 class="text-xl font-bold text-gray-800" id="displayProductDesc">Official Mill Test Report Document</h2>
         <button onclick="window.print()" class="bg-green-700 hover:bg-green-800 text-white font-semibold px-5 py-2.5 rounded shadow text-sm transition flex items-center gap-2">
@@ -72,8 +80,17 @@
         </button>
       </div>
 
-      <div id="printable-area" class="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
-        <iframe id="pdfViewerIframe" src="" width="100%" height="850px" class="border-0"></iframe>
+      <div id="printable-area" class="bg-white p-6 rounded-lg shadow border border-gray-200">
+        
+        <!-- Printable Custom Header Tag (Hidden unless text is typed) -->
+        <div id="customDescDisplayBox" class="hidden mb-4 pb-3 border-b-2 border-blue-900 bg-yellow-100 p-3 rounded">
+          <p class="text-[10px] font-bold text-yellow-900 uppercase tracking-wider">Custom Line Item Description / PO Tag:</p>
+          <p id="resCustomDesc" class="text-sm font-bold text-gray-900 mt-0.5"></p>
+        </div>
+
+        <div class="w-full">
+          <iframe id="pdfViewerIframe" src="" width="100%" height="850px" class="border border-gray-300 rounded"></iframe>
+        </div>
       </div>
     </div>
 
@@ -123,7 +140,7 @@
 
         const matches = fileList.filter(filename => {
           const cleanName = filename.toUpperCase();
-          return cleanName.startsWith(input + " ") || cleanName.startsWith(input + ".") || cleanName.startsWith(input + "_") || cleanName === (input + ".PDF");
+          return cleanName.includes(input);
         });
 
         if (matches.length === 0) {
@@ -156,7 +173,22 @@
       document.getElementById('noResults').classList.add('hidden');
       document.getElementById('displayProductDesc').innerText = label;
       document.getElementById('pdfViewerIframe').src = `pdfs/${encodeURIComponent(filename)}`;
+      document.getElementById('customDescInput').value = '';
+      document.getElementById('customDescDisplayBox').classList.add('hidden');
       document.getElementById('resultsContainer').classList.remove('hidden');
+    }
+
+    function updateCustomDesc() {
+      const val = document.getElementById('customDescInput').value.trim();
+      const displayBox = document.getElementById('customDescDisplayBox');
+      const resCustom = document.getElementById('resCustomDesc');
+
+      if (val) {
+        resCustom.innerText = val;
+        displayBox.classList.remove('hidden');
+      } else {
+        displayBox.classList.add('hidden');
+      }
     }
 
     function toggleAdminModal() {
