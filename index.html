@@ -42,35 +42,87 @@
     </div>
   </header>
 
+  <!-- Navigation Mode Switcher -->
+  <div class="bg-blue-900 text-white shadow no-print">
+    <div class="max-w-5xl mx-auto px-4 flex space-x-4">
+      <button onclick="switchTab('single')" id="tabSingle" class="py-3 px-4 font-bold border-b-4 border-white text-sm transition">🔍 Single Heat Search</button>
+      <button onclick="switchTab('batch')" id="tabBatch" class="py-3 px-4 font-bold border-b-4 border-transparent text-blue-200 hover:text-white text-sm transition">📋 Batch Order Lookup (Westbrook Style)</button>
+    </div>
+  </div>
+
   <!-- Main Content -->
   <main class="max-w-5xl mx-auto w-full px-4 py-8 flex-grow">
     
-    <!-- Search Box -->
-    <div class="bg-white rounded-lg shadow-md p-6 mb-8 no-print border-t-4 border-[#1B365D]">
-      <h2 class="text-lg font-bold text-[#1B365D] mb-2">Search Material Test Reports</h2>
-      <p class="text-sm text-gray-600 mb-4">Enter the <strong>Heat Code</strong> stamped on your fitting or component to pull up the certified Mill Test Report.</p>
-      
-      <div class="flex flex-col sm:flex-row gap-3">
-        <input type="text" id="searchInput" placeholder="Enter Heat # (e.g. 032A, 424)..." class="flex-grow border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600">
-        <button onclick="performSearch()" class="bg-[#1B365D] hover:bg-blue-900 text-white font-semibold px-6 py-2 rounded transition">Search MTR</button>
+    <!-- TAB 1: Single Heat Search (Default) -->
+    <div id="sectionSingle">
+      <div class="bg-white rounded-lg shadow-md p-6 mb-8 no-print border-t-4 border-[#1B365D]">
+        <h2 class="text-lg font-bold text-[#1B365D] mb-2">Search Material Test Reports</h2>
+        <p class="text-sm text-gray-600 mb-4">Enter the <strong>Heat Code</strong> stamped on your fitting or component to pull up the certified Mill Test Report.</p>
+        
+        <div class="flex flex-col sm:flex-row gap-3">
+          <input type="text" id="searchInput" placeholder="Enter Heat # (e.g. 032A)..." class="flex-grow border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600">
+          <button onclick="performSearch()" class="bg-[#1B365D] hover:bg-blue-900 text-white font-semibold px-6 py-2 rounded transition">Search MTR</button>
+        </div>
+      </div>
+
+      <!-- Multi-Item Selector -->
+      <div id="selectionContainer" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 no-print">
+        <h3 class="text-sm font-bold text-[#1B365D] mb-1">Matching Products Found for Heat <span id="selHeatNum" class="font-mono"></span></h3>
+        <p class="text-xs text-gray-600 mb-3">Please select the specific product description matching your component:</p>
+        <div id="itemList" class="space-y-2"></div>
       </div>
     </div>
 
-    <!-- Multi-Item Selector -->
-    <div id="selectionContainer" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 no-print">
-      <h3 class="text-sm font-bold text-[#1B365D] mb-1">Matching Products Found for Heat <span id="selHeatNum" class="font-mono"></span></h3>
-      <p class="text-xs text-gray-600 mb-3">Please select the specific product description matching your component:</p>
-      <div id="itemList" class="space-y-2"></div>
+    <!-- TAB 2: Batch Order Lookup (Westbrook Style) -->
+    <div id="sectionBatch" class="hidden">
+      <div class="bg-white rounded-lg shadow-md p-6 mb-8 no-print border-t-4 border-[#1B365D]">
+        <h2 class="text-lg font-bold text-[#1B365D] mb-2">Batch Order Lookup</h2>
+        <p class="text-sm text-gray-600 mb-4">Enter a custom item description / PO tag and input up to 10 heat codes simultaneously[cite: 14].</p>
+        
+        <div class="mb-4">
+          <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Item Description / PO Tag:</label>
+          <input type="text" id="batchDescInput" placeholder="e.g. Line 4B Booster Station - PO #9042" class="w-full border border-gray-300 rounded px-3 py-2 text-sm">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Heat Code[cite: 14]</label>
+            <div id="batchHeatInputs" class="space-y-2">
+              <!-- Generated via JS -->
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Suffix (Optional)</label>
+            <div id="batchSuffixInputs" class="space-y-2">
+              <!-- Generated via JS -->
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-4 border-t pt-4">
+          <div class="space-y-1 text-sm">
+            <label class="flex items-center space-x-2 cursor-pointer">
+              <input type="radio" name="batchAction" value="view" checked class="text-blue-900">
+              <span>View MTR now[cite: 14].</span>
+            </label>
+            <label class="flex items-center space-x-2 cursor-pointer">
+              <input type="radio" name="batchAction" value="print" class="text-blue-900">
+              <span>View MTR as a PDF / Print[cite: 14].</span>
+            </label>
+          </div>
+          <button onclick="processBatchSearch()" class="bg-[#1B365D] hover:bg-blue-900 text-white font-semibold px-8 py-2.5 rounded transition">Submit Batch</button>
+        </div>
+      </div>
     </div>
 
     <!-- Search Results / PDF Viewer Container -->
     <div id="resultsContainer" class="hidden">
       
-      <!-- Prominent After-Hours Custom Override Box -->
-      <div class="bg-amber-50 border-2 border-amber-400 rounded-lg p-4 mb-6 no-print shadow-md">
+      <!-- After-Hours Custom Override Box (Single Mode) -->
+      <div id="singleOverrideBox" class="bg-amber-50 border-2 border-amber-400 rounded-lg p-4 mb-6 no-print shadow-md">
         <h3 class="text-sm font-bold text-amber-900 mb-1">⚠️ After-Hours Missing Description Override</h3>
-        <p class="text-xs text-amber-800 mb-2">If your exact part variation wasn't listed, type your custom product description or PO tag here. It will automatically print on the cover sheet below:</p>
-        <input type="text" id="customDescInput" oninput="updateCustomDesc()" placeholder="e.g. Line 4B Booster Station - Custom size / PO #9042" class="w-full border-2 border-amber-500 bg-white rounded px-3 py-2 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-600">
+        <p class="text-xs text-amber-800 mb-2">If your exact part variation wasn't listed, type your custom product description or PO tag here:</p>
+        <input type="text" id="customDescInput" oninput="updateCustomDesc()" placeholder="e.g. Special order component / PO #9042" class="w-full border-2 border-amber-500 bg-white rounded px-3 py-2 text-sm font-semibold text-gray-800 focus:outline-none">
       </div>
 
       <div class="flex justify-between items-center mb-4 no-print">
@@ -99,7 +151,7 @@
 
           <!-- Printed Custom Override Tag -->
           <div id="customDescDisplayBox" class="hidden mt-3 bg-yellow-100 border-2 border-yellow-400 p-3 rounded">
-            <p class="text-[10px] font-bold text-yellow-900 uppercase tracking-wider">After-Hours Custom Product Description Override:</p>
+            <p class="text-[10px] font-bold text-yellow-900 uppercase tracking-wider">Custom Product Description / After-Hours Tag:</p>
             <p id="resCustomDesc" class="text-sm font-bold text-gray-900 mt-0.5"></p>
           </div>
         </div>
@@ -143,6 +195,34 @@
   </div>
 
   <script>
+    // Initialize Batch Input Rows on Load
+    window.onload = function() {
+      let heatHtml = '';
+      let suffixHtml = '';
+      for (let i = 0; i < 8; i++) {
+        heatHtml += `<input type="text" id="bHeat_${i}" placeholder="Heat #" class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm uppercase">`;
+        suffixHtml += `<input type="text" id="bSuffix_${i}" placeholder="Suffix" class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm uppercase">`;
+      }
+      document.getElementById('batchHeatInputs').innerHTML = heatHtml;
+      document.getElementById('batchSuffixInputs').innerHTML = suffixHtml;
+    };
+
+    function switchTab(mode) {
+      document.getElementById('resultsContainer').classList.add('hidden');
+      document.getElementById('noResults').classList.add('hidden');
+      if (mode === 'single') {
+        document.getElementById('sectionSingle').classList.remove('hidden');
+        document.getElementById('sectionBatch').classList.add('hidden');
+        document.getElementById('tabSingle').className = "py-3 px-4 font-bold border-b-4 border-white text-sm transition";
+        document.getElementById('tabBatch').className = "py-3 px-4 font-bold border-b-4 border-transparent text-blue-200 hover:text-white text-sm transition";
+      } else {
+        document.getElementById('sectionSingle').classList.add('hidden');
+        document.getElementById('sectionBatch').classList.remove('hidden');
+        document.getElementById('tabBatch').className = "py-3 px-4 font-bold border-b-4 border-white text-sm transition";
+        document.getElementById('tabSingle').className = "py-3 px-4 font-bold border-b-4 border-transparent text-blue-200 hover:text-white text-sm transition";
+      }
+    }
+
     async function performSearch() {
       const input = document.getElementById('searchInput').value.trim().toUpperCase();
       const resBox = document.getElementById('resultsContainer');
@@ -157,10 +237,7 @@
 
       try {
         const response = await fetch('mtr-list.json');
-        let fileList = [];
-        if (response.ok) {
-          fileList = await response.json();
-        }
+        let fileList = response.ok ? await response.json() : [];
 
         const matches = fileList.filter(filename => {
           const cleanName = filename.toUpperCase();
@@ -173,13 +250,13 @@
         }
 
         if (matches.length === 1) {
-          loadPdfDirect(matches[0], matches[0]);
+          loadPdfDirect(matches[0], matches[0], true);
         } else {
           document.getElementById('selHeatNum').innerText = input;
           let listHtml = '';
           matches.forEach(filename => {
             const cleanLabel = filename.replace(/\.[^/.]+$/, "");
-            listHtml += `<button onclick="loadPdfDirect('${filename.replace(/'/g, "\\'")}', '${cleanLabel.replace(/'/g, "\\'")}')" class="w-full text-left bg-white hover:bg-blue-100 border border-blue-200 p-2.5 rounded text-xs font-semibold text-blue-900 transition flex justify-between items-center">
+            listHtml += `<button onclick="loadPdfDirect('${filename.replace(/'/g, "\\'")}', '${cleanLabel.replace(/'/g, "\\'")}', true)" class="w-full text-left bg-white hover:bg-blue-100 border border-blue-200 p-2.5 rounded text-xs font-semibold text-blue-900 transition flex justify-between items-center">
               <span>${cleanLabel}</span>
               <span class="text-gray-500 font-mono text-[10px]">Select PDF →</span>
             </button>`;
@@ -188,16 +265,67 @@
           selBox.classList.remove('hidden');
         }
       } catch (e) {
+        noResBox.classList.add('hidden');
+      }
+    }
+
+    async function processBatchSearch() {
+      const batchDesc = document.getElementById('batchDescInput').value.trim();
+      const noResBox = document.getElementById('noResults');
+      noResBox.classList.add('hidden');
+
+      // Gather entered heats
+      let heatsToCheck = [];
+      for (let i = 0; i < 8; i++) {
+        let val = document.getElementById(`bHeat_${i}`).value.trim().toUpperCase();
+        if (val) heatsToCheck.push(val);
+      }
+
+      if (heatsToCheck.length === 0) {
+        alert('Please enter at least one Heat Code.');
+        return;
+      }
+
+      try {
+        const response = await fetch('mtr-list.json');
+        let fileList = response.ok ? await response.json() : [];
+
+        // Find first match for the first heat entered
+        let firstMatch = fileList.find(filename => {
+          const cleanName = filename.toUpperCase();
+          return cleanName.startsWith(heatsToCheck[0] + " ") || cleanName.startsWith(heatsToCheck[0] + ".") || cleanName.startsWith(heatsToCheck[0] + "_");
+        });
+
+        if (!firstMatch) {
+          noResBox.classList.remove('hidden');
+          return;
+        }
+
+        // Apply batch description if entered
+        if (batchDesc) {
+          document.getElementById('customDescInput').value = batchDesc;
+          updateCustomDesc();
+        }
+
+        loadPdfDirect(firstMatch, firstMatch, false);
+      } catch (e) {
         noResBox.classList.remove('hidden');
       }
     }
 
-    function loadPdfDirect(filename, label) {
+    function loadPdfDirect(filename, label, isSingleMode) {
       document.getElementById('selectionContainer').classList.add('hidden');
       document.getElementById('noResults').classList.add('hidden');
       document.getElementById('displayProductDesc').innerText = label;
       document.getElementById('pdfViewerIframe').src = `pdfs/${encodeURIComponent(filename)}`;
       document.getElementById('printDate').innerText = "Issued: " + new Date().toLocaleDateString();
+      
+      if (isSingleMode) {
+        document.getElementById('singleOverrideBox').classList.remove('hidden');
+      } else {
+        document.getElementById('singleOverrideBox').classList.add('hidden');
+      }
+
       document.getElementById('resultsContainer').classList.remove('hidden');
     }
 
