@@ -63,34 +63,65 @@
       <div id="itemList" class="space-y-2"></div>
     </div>
 
-    <!-- Search Results / PDF Viewer Container -->
+    <!-- Search Results / Results Container -->
     <div id="resultsContainer" class="hidden">
       
-      <!-- Custom Line Item Description / PO Override Box -->
+      <!-- Custom Description Box -->
       <div class="bg-amber-50 border-2 border-amber-400 rounded-lg p-4 mb-6 no-print shadow-md">
-        <h3 class="text-sm font-bold text-amber-900 mb-1">📝 Custom Line Item Description / PO Tag (Optional)</h3>
-        <p class="text-xs text-amber-800 mb-2">If you need a specific part description or PO tag on your printed document, type it below:</p>
-        <input type="text" id="customDescInput" oninput="updateCustomDesc()" placeholder="e.g. 2 X 6 S160 A106B BLK SMLS NPL TBE / PO #9042" class="w-full border-2 border-amber-500 bg-white rounded px-3 py-2 text-sm font-semibold text-gray-800 focus:outline-none">
+        <h3 class="text-sm font-bold text-amber-900 mb-1">📝 Need a Custom Description / After-Hours Tag?</h3>
+        <p class="text-xs text-amber-800 mb-2">Type your custom part description or PO tag below. This will instantly generate a verified portal-generated MTR copy with your custom description:</p>
+        <input type="text" id="customDescInput" oninput="handleCustomDescription()" placeholder="e.g. 2 X 6 S160 A106B BLK SMLS NPL TBE / PO #9042" class="w-full border-2 border-amber-500 bg-white rounded px-3 py-2 text-sm font-semibold text-gray-800 focus:outline-none">
       </div>
 
       <div class="flex justify-between items-center mb-4 no-print">
-        <h2 class="text-xl font-bold text-gray-800" id="displayProductDesc">Official Mill Test Report Document</h2>
+        <h2 class="text-xl font-bold text-gray-800" id="headerTitle">Official Mill Test Report Document</h2>
         <button onclick="window.print()" class="bg-green-700 hover:bg-green-800 text-white font-semibold px-5 py-2.5 rounded shadow text-sm transition flex items-center gap-2">
-          🖨️ Print / Save PDF
+          🖨️ Print / Save Document
         </button>
       </div>
 
+      <!-- Printable Area -->
       <div id="printable-area" class="bg-white p-6 rounded-lg shadow border border-gray-200">
         
-        <!-- Printable Custom Header Tag (Hidden unless text is typed) -->
-        <div id="customDescDisplayBox" class="hidden mb-4 pb-3 border-b-2 border-blue-900 bg-yellow-100 p-3 rounded">
-          <p class="text-[10px] font-bold text-yellow-900 uppercase tracking-wider">Custom Line Item Description / PO Tag:</p>
-          <p id="resCustomDesc" class="text-sm font-bold text-gray-900 mt-0.5"></p>
+        <!-- Generated Summary Sheet View (Shows up when typing a custom description) -->
+        <div id="generatedSheet" class="hidden">
+          <div class="border-b-2 border-[#1B365D] pb-4 mb-4 flex justify-between items-center">
+            <div>
+              <h2 class="text-xl font-bold text-[#1B365D]">TITAN FLOW PRODUCTS INC.</h2>
+              <p class="text-xs text-gray-600">8524 Roper Road NW, Edmonton, AB T6E 6V4 | PH: (587) 410-8373</p>
+            </div>
+            <div class="text-right">
+              <span class="inline-block bg-blue-100 text-blue-900 text-xs px-2 py-1 rounded font-bold uppercase">Portal-Generated MTR Copy</span>
+              <p class="text-xs text-gray-500 mt-1" id="genDate"></p>
+            </div>
+          </div>
+
+          <div class="bg-blue-50 border border-blue-200 p-4 rounded mb-6">
+            <p class="text-[10px] font-bold text-blue-900 uppercase tracking-wider">Custom Customer Description / PO Tag:</p>
+            <p id="genCustomText" class="text-base font-bold text-gray-900 mt-1"></p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4 mb-6 text-sm">
+            <div class="border p-3 rounded bg-gray-50">
+              <p class="text-xs text-gray-500 font-semibold uppercase">Heat Code:</p>
+              <p id="genHeatCode" class="font-mono font-bold text-lg text-blue-900"></p>
+            </div>
+            <div class="border p-3 rounded bg-gray-50">
+              <p class="text-xs text-gray-500 font-semibold uppercase">Source Document:</p>
+              <p id="genSourceFile" class="font-mono text-xs text-gray-700 mt-1"></p>
+            </div>
+          </div>
+
+          <div class="border-t pt-4 text-xs text-gray-600 space-y-2">
+            <p><strong>Compliance & Traceability Notice:</strong> This portal-generated copy is issued for customer convenience and internal tracking per request via mtr.titanflowproducts.com. Certified mill test parameters and chemical/mechanical properties remain governed by the primary manufacturer documentation on file.</p>
+          </div>
         </div>
 
-        <div class="w-full">
+        <!-- Standard PDF iframe Viewer (Shows by default) -->
+        <div id="pdfViewerWrapper" class="w-full">
           <iframe id="pdfViewerIframe" src="" width="100%" height="850px" class="border border-gray-300 rounded"></iframe>
         </div>
+
       </div>
     </div>
 
@@ -122,6 +153,9 @@
   </div>
 
   <script>
+    let currentActiveFile = '';
+    let currentSearchedHeat = '';
+
     async function performSearch() {
       const input = document.getElementById('searchInput').value.trim().toUpperCase();
       const resBox = document.getElementById('resultsContainer');
@@ -133,6 +167,7 @@
       noResBox.classList.add('hidden');
 
       if (!input) return;
+      currentSearchedHeat = input;
 
       try {
         const response = await fetch('mtr-list.json');
@@ -149,13 +184,13 @@
         }
 
         if (matches.length === 1) {
-          loadPdfDirect(matches[0], matches[0]);
+          loadPdfDirect(matches[0]);
         } else {
           document.getElementById('selHeatNum').innerText = input;
           let listHtml = '';
           matches.forEach(filename => {
             const cleanLabel = filename.replace(/\.[^/.]+$/, "");
-            listHtml += `<button onclick="loadPdfDirect('${filename.replace(/'/g, "\\'")}', '${cleanLabel.replace(/'/g, "\\'")}')" class="w-full text-left bg-white hover:bg-blue-100 border border-blue-200 p-2.5 rounded text-xs font-semibold text-blue-900 transition flex justify-between items-center">
+            listHtml += `<button onclick="loadPdfDirect('${filename.replace(/'/g, "\\'")}')" class="w-full text-left bg-white hover:bg-blue-100 border border-blue-200 p-2.5 rounded text-xs font-semibold text-blue-900 transition flex justify-between items-center">
               <span>${cleanLabel}</span>
               <span class="text-gray-500 font-mono text-[10px]">Select PDF →</span>
             </button>`;
@@ -168,26 +203,41 @@
       }
     }
 
-    function loadPdfDirect(filename, label) {
+    function loadPdfDirect(filename) {
+      currentActiveFile = filename;
       document.getElementById('selectionContainer').classList.add('hidden');
       document.getElementById('noResults').classList.add('hidden');
-      document.getElementById('displayProductDesc').innerText = label;
-      document.getElementById('pdfViewerIframe').src = `pdfs/${encodeURIComponent(filename)}`;
       document.getElementById('customDescInput').value = '';
-      document.getElementById('customDescDisplayBox').classList.add('hidden');
+      
+      // Show standard PDF viewer
+      document.getElementById('generatedSheet').classList.add('hidden');
+      document.getElementById('pdfViewerWrapper').classList.remove('hidden');
+      document.getElementById('headerTitle').innerText = "Official Mill Test Report Document";
+      document.getElementById('pdfViewerIframe').src = `pdfs/${encodeURIComponent(filename)}`;
       document.getElementById('resultsContainer').classList.remove('hidden');
     }
 
-    function updateCustomDesc() {
+    function handleCustomDescription() {
       const val = document.getElementById('customDescInput').value.trim();
-      const displayBox = document.getElementById('customDescDisplayBox');
-      const resCustom = document.getElementById('resCustomDesc');
+      const generatedSheet = document.getElementById('generatedSheet');
+      const pdfWrapper = document.getElementById('pdfViewerWrapper');
+      const headerTitle = document.getElementById('headerTitle');
 
       if (val) {
-        resCustom.innerText = val;
-        displayBox.classList.remove('hidden');
+        // Switch view to generated summary copy
+        document.getElementById('genCustomText').innerText = val;
+        document.getElementById('genHeatCode').innerText = currentSearchedHeat || "N/A";
+        document.getElementById('genSourceFile').innerText = currentActiveFile;
+        document.getElementById('genDate').innerText = "Generated: " + new Date().toLocaleDateString();
+
+        pdfWrapper.classList.add('hidden');
+        generatedSheet.classList.remove('hidden');
+        headerTitle.innerText = "Portal-Generated MTR Summary Copy";
       } else {
-        displayBox.classList.add('hidden');
+        // Revert back to official PDF if box is cleared
+        generatedSheet.classList.add('hidden');
+        pdfWrapper.classList.remove('hidden');
+        headerTitle.innerText = "Official Mill Test Report Document";
       }
     }
 
