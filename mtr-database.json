@@ -1,0 +1,18 @@
+[
+  {
+    "heat": "T663401",
+    "description": "50 NPT ELBOW 1/2\" 2M A/SA105N",
+    "specs": "ASTM A/SA105N-2023 acc. To EN 10204 / DIN 10204 / DIN 50049/3.1 ** NACE MR.0175/ISO15156-2000/ISO9001:2015, SP-25.",
+    "heatTreatment": "Normalizing at 920°, air cooling",
+    "dimension": "ASME B16.11-2015, MSS SP-83-2018",
+    "threads": "ANSI/ASME B1.20.1",
+    "chem": {
+      "c": "0.17", "mn": "0.95", "p": "0.008", "s": "0.003", "si": "0.22", "cr": "0.04", "ni": "0.03", "mo": "0.0018",
+      "cu": "0.03", "v": "0.0051", "al": "0", "ti": "0", "b": "0", "nb": "0", "ce": "0.34"
+    },
+    "mech": {
+      "tensile": "558", "yield": "312", "elong": "39", "ra": "65", "hardness": "136-155"
+    },
+    "comments": "Steel making process: Electric Furnace.\nWe certify the above mentioned fittings have been manufactured and tested in accordance with stated specifications indicated above."
+  }
+]
