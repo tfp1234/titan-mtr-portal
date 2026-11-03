@@ -7,37 +7,18 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @media print {
-      /* Hide everything on the page by default */
       body * { visibility: hidden !important; }
-      
-      /* Only show our clean print container */
       #printable-area, #printable-area * { visibility: visible !important; }
-      
       #printable-area { 
-        position: fixed !important; 
+        position: absolute !important; 
         left: 0 !important; 
         top: 0 !important; 
         width: 100% !important; 
-        height: 100% !important;
         margin: 0 !important; 
         padding: 0 !important; 
-        background: white !important;
       }
-      
       .no-print { display: none !important; }
-      
-      /* Make sure iframe fills the print page cleanly without scrollbars */
-      iframe { 
-        width: 100% !important; 
-        height: 98vh !important; 
-        border: none !important; 
-        display: block !important; 
-      }
-
-      @page {
-        size: auto;
-        margin: 5mm; /* Eliminates browser header/footer URLs and date stamps */
-      }
+      iframe { display: none !important; } /* Hide iframe during page print to prevent multi-page overflow */
     }
   </style>
 </head>
@@ -95,29 +76,34 @@
       <!-- Custom Description Input -->
       <div class="bg-amber-50 border-2 border-amber-400 rounded-lg p-4 mb-6 no-print shadow-md">
         <h3 class="text-sm font-bold text-amber-900 mb-1">📝 Custom Line Item Description / PO Tag (Optional)</h3>
-        <p class="text-xs text-amber-800 mb-2">Type your custom part description or PO tag below to include it on the printout:</p>
+        <p class="text-xs text-amber-800 mb-2">Type your custom part description or PO tag below:</p>
         <input type="text" id="customDescInput" oninput="updateCustomDesc()" placeholder="e.g. 2 X 6 S160 A106B BLK SMLS NPL TBE / PO #9042" class="w-full border-2 border-amber-500 bg-white rounded px-3 py-2 text-sm font-semibold text-gray-800 focus:outline-none">
       </div>
 
-      <div class="flex justify-between items-center mb-4 no-print">
+      <div class="flex flex-wrap justify-between items-center mb-4 no-print gap-3">
         <h2 class="text-xl font-bold text-gray-800" id="displayProductDesc">Official Mill Test Report Document</h2>
-        <button onclick="window.print()" class="bg-green-700 hover:bg-green-800 text-white font-semibold px-5 py-2.5 rounded shadow text-sm transition flex items-center gap-2">
-          🖨️ Print / Save Document
-        </button>
+        <div class="flex gap-2">
+          <a id="openFullPdfBtn" href="" target="_blank" class="bg-blue-700 hover:bg-blue-800 text-white font-semibold px-4 py-2 rounded shadow text-sm transition flex items-center gap-2">
+            📄 Open / Print Full PDF
+          </a>
+          <button onclick="window.print()" class="bg-green-700 hover:bg-green-800 text-white font-semibold px-4 py-2 rounded shadow text-sm transition flex items-center gap-2">
+            🖨️ Print Custom Tag
+          </button>
+        </div>
       </div>
 
       <!-- Printable Area -->
-      <div id="printable-area" class="bg-white p-3 rounded-lg shadow border border-gray-200">
+      <div id="printable-area" class="bg-white p-4 rounded-lg shadow border border-gray-200">
         
         <!-- Custom Header Tag -->
-        <div id="customDescDisplayBox" class="hidden mb-2 pb-2 border-b-2 border-blue-900 bg-yellow-100 p-2.5 rounded">
-          <p class="text-[9px] font-bold text-yellow-900 uppercase tracking-wider">Custom Line Item Description / PO Tag:</p>
-          <p id="resCustomDesc" class="text-xs font-bold text-gray-900 mt-0.5"></p>
+        <div id="customDescDisplayBox" class="hidden mb-4 pb-3 border-b-2 border-blue-900 bg-yellow-100 p-3 rounded">
+          <p class="text-[10px] font-bold text-yellow-900 uppercase tracking-wider">Custom Line Item Description / PO Tag:</p>
+          <p id="resCustomDesc" class="text-sm font-bold text-gray-900 mt-1"></p>
         </div>
 
         <!-- Official Manufacturer PDF Viewer -->
         <div class="w-full">
-          <iframe id="pdfViewerIframe" src="" width="100%" height="800px" class="border border-gray-300 rounded"></iframe>
+          <iframe id="pdfViewerIframe" src="" width="100%" height="850px" class="border border-gray-300 rounded"></iframe>
         </div>
       </div>
     </div>
@@ -200,7 +186,12 @@
       document.getElementById('selectionContainer').classList.add('hidden');
       document.getElementById('noResults').classList.add('hidden');
       document.getElementById('displayProductDesc').innerText = label;
-      document.getElementById('pdfViewerIframe').src = `pdfs/${encodeURIComponent(filename)}#toolbar=0&navpanes=0`;
+      
+      const pdfUrl = `pdfs/${encodeURIComponent(filename)}`;
+      document.getElementById('pdfViewerIframe').src = pdfUrl;
+      document.getElementById('openFullPdfBtn.href') // fixed below
+      document.getElementById('openFullPdfBtn').href = pdfUrl;
+
       document.getElementById('customDescInput').value = '';
       document.getElementById('customDescDisplayBox').classList.add('hidden');
       document.getElementById('resultsContainer').classList.remove('hidden');
