@@ -7,22 +7,36 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @media print {
+      /* Hide everything on the page by default */
       body * { visibility: hidden !important; }
+      
+      /* Only show our clean print container */
       #printable-area, #printable-area * { visibility: visible !important; }
+      
       #printable-area { 
-        position: absolute !important; 
+        position: fixed !important; 
         left: 0 !important; 
         top: 0 !important; 
         width: 100% !important; 
+        height: 100% !important;
         margin: 0 !important; 
         padding: 0 !important; 
+        background: white !important;
       }
+      
       .no-print { display: none !important; }
+      
+      /* Make sure iframe fills the print page cleanly without scrollbars */
       iframe { 
-        height: 100vh !important; 
         width: 100% !important; 
+        height: 98vh !important; 
         border: none !important; 
         display: block !important; 
+      }
+
+      @page {
+        size: auto;
+        margin: 5mm; /* Eliminates browser header/footer URLs and date stamps */
       }
     }
   </style>
@@ -51,3 +65,172 @@
         <p>PH: (587) 410-8373 | Mon - Fri: 8:00 AM – 5:00 PM</p>
         <button onclick="toggleAdminModal()" class="mt-1 text-xs bg-blue-800 hover:bg-blue-700 text-white px-3 py-1 rounded shadow transition">Staff Access</button>
       </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-5xl mx-auto w-full px-4 py-8 flex-grow">
+    
+    <!-- Search Box -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8 no-print border-t-4 border-[#1B365D]">
+      <h2 class="text-lg font-bold text-[#1B365D] mb-2">Search Material Test Reports</h2>
+      <p class="text-sm text-gray-600 mb-4">Enter the <strong>Heat Code</strong> stamped on your fitting or component to pull up the certified Mill Test Report.</p>
+      
+      <div class="flex flex-col sm:flex-row gap-3">
+        <input type="text" id="searchInput" placeholder="Enter Heat # (e.g. T663401)..." class="flex-grow border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600" onkeydown="if(event.key === 'Enter') performSearch()">
+        <button onclick="performSearch()" class="bg-[#1B365D] hover:bg-blue-900 text-white font-semibold px-6 py-2 rounded transition">Search MTR</button>
+      </div>
+    </div>
+
+    <!-- Multi-Item Selector -->
+    <div id="selectionContainer" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 no-print">
+      <h3 class="text-sm font-bold text-[#1B365D] mb-1">Matching Products Found for Heat <span id="selHeatNum" class="font-mono"></span></h3>
+      <p class="text-xs text-gray-600 mb-3">Please select the specific product description matching your component:</p>
+      <div id="itemList" class="space-y-2"></div>
+    </div>
+
+    <!-- Search Results / PDF Viewer Container -->
+    <div id="resultsContainer" class="hidden">
+      
+      <!-- Custom Description Input -->
+      <div class="bg-amber-50 border-2 border-amber-400 rounded-lg p-4 mb-6 no-print shadow-md">
+        <h3 class="text-sm font-bold text-amber-900 mb-1">📝 Custom Line Item Description / PO Tag (Optional)</h3>
+        <p class="text-xs text-amber-800 mb-2">Type your custom part description or PO tag below to include it on the printout:</p>
+        <input type="text" id="customDescInput" oninput="updateCustomDesc()" placeholder="e.g. 2 X 6 S160 A106B BLK SMLS NPL TBE / PO #9042" class="w-full border-2 border-amber-500 bg-white rounded px-3 py-2 text-sm font-semibold text-gray-800 focus:outline-none">
+      </div>
+
+      <div class="flex justify-between items-center mb-4 no-print">
+        <h2 class="text-xl font-bold text-gray-800" id="displayProductDesc">Official Mill Test Report Document</h2>
+        <button onclick="window.print()" class="bg-green-700 hover:bg-green-800 text-white font-semibold px-5 py-2.5 rounded shadow text-sm transition flex items-center gap-2">
+          🖨️ Print / Save Document
+        </button>
+      </div>
+
+      <!-- Printable Area -->
+      <div id="printable-area" class="bg-white p-3 rounded-lg shadow border border-gray-200">
+        
+        <!-- Custom Header Tag -->
+        <div id="customDescDisplayBox" class="hidden mb-2 pb-2 border-b-2 border-blue-900 bg-yellow-100 p-2.5 rounded">
+          <p class="text-[9px] font-bold text-yellow-900 uppercase tracking-wider">Custom Line Item Description / PO Tag:</p>
+          <p id="resCustomDesc" class="text-xs font-bold text-gray-900 mt-0.5"></p>
+        </div>
+
+        <!-- Official Manufacturer PDF Viewer -->
+        <div class="w-full">
+          <iframe id="pdfViewerIframe" src="" width="100%" height="800px" class="border border-gray-300 rounded"></iframe>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Results Box -->
+    <div id="noResults" class="hidden bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-lg p-6 text-center">
+      <p class="font-bold">No MTR PDF found for that Heat Code.</p>
+      <p class="text-sm mt-1">Please verify the heat number stamped on your component or contact Titan Flow Products at <strong>(587) 410-8373</strong>.</p>
+    </div>
+  </main>
+
+  <!-- Staff Admin Modal -->
+  <div id="adminModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 no-print">
+    <div class="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+      <h3 class="text-lg font-bold text-[#1B365D] mb-4">Staff Portal Access</h3>
+      <div id="adminAuth">
+        <p class="text-sm text-gray-600 mb-3">Enter staff passcode to access management controls:</p>
+        <input type="password" id="adminPass" placeholder="Enter staff passcode..." class="w-full border rounded px-3 py-2 mb-4 text-sm">
+        <div class="flex justify-end space-x-2">
+          <button onclick="toggleAdminModal()" class="px-4 py-2 text-sm text-gray-600">Cancel</button>
+          <button onclick="checkAdminPass()" class="bg-[#1B365D] text-white px-4 py-2 rounded text-sm">Log In</button>
+        </div>
+      </div>
+      <div id="adminControls" class="hidden">
+        <p class="text-sm font-semibold text-green-700 mb-2">✓ Authenticated as Staff Administrator</p>
+        <p class="text-xs text-gray-600 mb-4">To add files, drop PDF files into <code>/pdfs/</code> on GitHub and update <code>mtr-list.json</code>.</p>
+        <button onclick="toggleAdminModal()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded text-sm font-semibold">Close Panel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function performSearch() {
+      const input = document.getElementById('searchInput').value.trim().toUpperCase();
+      const resBox = document.getElementById('resultsContainer');
+      const selBox = document.getElementById('selectionContainer');
+      const noResBox = document.getElementById('noResults');
+
+      resBox.classList.add('hidden');
+      selBox.classList.add('hidden');
+      noResBox.classList.add('hidden');
+
+      if (!input) return;
+
+      try {
+        const response = await fetch('mtr-list.json');
+        let fileList = response.ok ? await response.json() : [];
+
+        const matches = fileList.filter(filename => {
+          const cleanName = filename.toUpperCase();
+          return cleanName.includes(input);
+        });
+
+        if (matches.length === 0) {
+          noResBox.classList.remove('hidden');
+          return;
+        }
+
+        if (matches.length === 1) {
+          loadPdfDirect(matches[0], matches[0]);
+        } else {
+          document.getElementById('selHeatNum').innerText = input;
+          let listHtml = '';
+          matches.forEach(filename => {
+            const cleanLabel = filename.replace(/\.[^/.]+$/, "");
+            listHtml += `<button onclick="loadPdfDirect('${filename.replace(/'/g, "\\'")}', '${cleanLabel.replace(/'/g, "\\'")}')" class="w-full text-left bg-white hover:bg-blue-100 border border-blue-200 p-2.5 rounded text-xs font-semibold text-blue-900 transition flex justify-between items-center">
+              <span>${cleanLabel}</span>
+              <span class="text-gray-500 font-mono text-[10px]">Select PDF →</span>
+            </button>`;
+          });
+          document.getElementById('itemList').innerHTML = listHtml;
+          selBox.classList.remove('hidden');
+        }
+      } catch (e) {
+        noResBox.classList.add('hidden');
+      }
+    }
+
+    function loadPdfDirect(filename, label) {
+      document.getElementById('selectionContainer').classList.add('hidden');
+      document.getElementById('noResults').classList.add('hidden');
+      document.getElementById('displayProductDesc').innerText = label;
+      document.getElementById('pdfViewerIframe').src = `pdfs/${encodeURIComponent(filename)}#toolbar=0&navpanes=0`;
+      document.getElementById('customDescInput').value = '';
+      document.getElementById('customDescDisplayBox').classList.add('hidden');
+      document.getElementById('resultsContainer').classList.remove('hidden');
+    }
+
+    function updateCustomDesc() {
+      const val = document.getElementById('customDescInput').value.trim();
+      const displayBox = document.getElementById('customDescDisplayBox');
+      const resCustom = document.getElementById('resCustomDesc');
+
+      if (val) {
+        resCustom.innerText = val;
+        displayBox.classList.remove('hidden');
+      } else {
+        displayBox.classList.add('hidden');
+      }
+    }
+
+    function toggleAdminModal() {
+      document.getElementById('adminModal').classList.toggle('hidden');
+    }
+
+    function checkAdminPass() {
+      if (document.getElementById('adminPass').value === 'Nipples8524!') {
+        document.getElementById('adminAuth').classList.add('hidden');
+        document.getElementById('adminControls').classList.remove('hidden');
+      } else {
+        alert('Incorrect Passcode');
+      }
+    }
+  </script>
+</body>
+</html>
