@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Titan Flow Products Inc. - Staff MTR Generator</title>
+  <title>Titan Flow Products Inc. - Staff MTR Generator & Database Creator</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @media print {
@@ -30,7 +30,7 @@
     <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
       <div>
         <h1 class="text-xl font-bold tracking-wide">TITAN FLOW PRODUCTS INC.</h1>
-        <p class="text-xs text-gray-300">Staff Internal MTR Generator & Management Portal</p>
+        <p class="text-xs text-gray-300">Staff Internal MTR Generator & Database Creator</p>
       </div>
       <div class="text-right text-xs text-gray-200">
         <p class="font-semibold">8524 Roper Road NW, Edmonton, AB</p>
@@ -42,37 +42,37 @@
   <!-- Main Content -->
   <main class="max-w-4xl mx-auto w-full px-4 py-8 flex-grow">
     
-    <!-- Option 1: Load from Database File -->
+    <!-- Option 1: Load Existing Record -->
     <div class="bg-white rounded-lg shadow-md p-6 mb-6 no-print border-t-4 border-[#1B365D]">
-      <h2 class="text-lg font-bold text-[#1B365D] mb-2">Option 1: Load from Database File</h2>
-      <p class="text-sm text-gray-600 mb-4">Enter a Heat Code to pull pre-saved records from your `mtr-database.json` file:</p>
+      <h2 class="text-lg font-bold text-[#1B365D] mb-2">Option 1: Load Existing Heat Code</h2>
+      <p class="text-sm text-gray-600 mb-4">Pull an existing record from `mtr-database.json` to review or modify:</p>
       <div class="flex flex-col sm:flex-row gap-3">
-        <input type="text" id="searchInput" placeholder="Enter Heat # (e.g. T663401)..." class="flex-grow border border-gray-300 rounded px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600" onkeydown="if(event.key === 'Enter') performSearch()">
+        <input type="text" id="searchInput" placeholder="Enter Heat # (e.g. T660338)..." class="flex-grow border border-gray-300 rounded px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600" onkeydown="if(event.key === 'Enter') performSearch()">
         <button onclick="performSearch()" class="bg-[#1B365D] hover:bg-blue-900 text-white font-semibold px-6 py-2 rounded text-sm transition">Load Record</button>
       </div>
     </div>
 
-    <!-- Option 2: Manual Data Entry Form -->
+    <!-- Option 2: Manual Data Entry Form & Database Creator -->
     <div class="bg-white rounded-lg shadow-md p-6 mb-8 no-print border-t-4 border-amber-600">
-      <h2 class="text-lg font-bold text-amber-900 mb-2">Option 2: Manual Entry Form (On-the-Fly Generator)</h2>
-      <p class="text-sm text-gray-600 mb-4">Fill out the fields below to manually generate a custom MTR certificate instantly:</p>
+      <h2 class="text-lg font-bold text-amber-900 mb-2">Option 2: Create / Edit MTR Record</h2>
+      <p class="text-sm text-gray-600 mb-4">Fill out the MTR properties below. You can generate a preview, or save it into your database for customer lookups:</p>
       
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
         <div>
-          <label class="block font-bold text-gray-700 mb-1">Heat Code:</label>
-          <input type="text" id="manualHeat" placeholder="e.g. T998822" class="w-full border rounded p-2 font-mono uppercase">
+          <label class="block font-bold text-gray-700 mb-1">Heat Code (Unique ID):</label>
+          <input type="text" id="manualHeat" placeholder="e.g. T660338" class="w-full border rounded p-2 font-mono uppercase font-bold text-blue-900">
         </div>
         <div>
           <label class="block font-bold text-gray-700 mb-1">Certificate No:</label>
           <input type="text" id="manualCert" value="MC26022600048" class="w-full border rounded p-2 font-mono">
         </div>
         <div class="sm:col-span-2">
-          <label class="block font-bold text-gray-700 mb-1">Product Description / PO Tag:</label>
-          <input type="text" id="manualDesc" placeholder="e.g. 2 X 6 S160 A106B BLK SMLS NPL TBE / PO #9042" class="w-full border rounded p-2 font-semibold">
+          <label class="block font-bold text-gray-700 mb-1">Standard Master Product Description:</label>
+          <input type="text" id="manualDesc" placeholder="e.g. 3 X 8 S80 X S160 A106B BLK SMLS NPL BXT" class="w-full border rounded p-2 font-semibold">
         </div>
         <div class="sm:col-span-2">
           <label class="block font-bold text-gray-700 mb-1">Specifications:</label>
-          <input type="text" id="manualSpecs" value="ASTM A/SA105N-2023 acc. To EN 10204 / DIN 10204 / DIN 50049/3.1 ** NACE MR.0175/ISO15156" class="w-full border rounded p-2">
+          <input type="text" id="manualSpecs" value="ASTM/ASME-2023, A106B, CSA Z245.1-22, Gr.359 CAT II, SS, NACE MR0175/103, MSS-SP25, SP-95." class="w-full border rounded p-2">
         </div>
         <div>
           <label class="block font-bold text-gray-700 mb-1">Heat Treatment:</label>
@@ -87,23 +87,23 @@
         <div class="sm:col-span-2 border-t pt-3">
           <p class="font-bold text-gray-800 mb-2 uppercase">Chemical Properties:</p>
           <div class="grid grid-cols-8 gap-1">
-            <div><label class="text-[10px] text-gray-500">C</label><input type="text" id="mC" value="0.17" class="w-full border rounded p-1 text-center font-mono"></div>
-            <div><label class="text-[10px] text-gray-500">Mn</label><input type="text" id="mMn" value="0.95" class="w-full border rounded p-1 text-center font-mono"></div>
-            <div><label class="text-[10px] text-gray-500">P</label><input type="text" id="mP" value="0.008" class="w-full border rounded p-1 text-center font-mono"></div>
+            <div><label class="text-[10px] text-gray-500">C</label><input type="text" id="mC" value="0.115" class="w-full border rounded p-1 text-center font-mono"></div>
+            <div><label class="text-[10px] text-gray-500">Mn</label><input type="text" id="mMn" value="1.26" class="w-full border rounded p-1 text-center font-mono"></div>
+            <div><label class="text-[10px] text-gray-500">P</label><input type="text" id="mP" value="0.007" class="w-full border rounded p-1 text-center font-mono"></div>
             <div><label class="text-[10px] text-gray-500">S</label><input type="text" id="mS" value="0.003" class="w-full border rounded p-1 text-center font-mono"></div>
-            <div><label class="text-[10px] text-gray-500">Si</label><input type="text" id="mSi" value="0.22" class="w-full border rounded p-1 text-center font-mono"></div>
-            <div><label class="text-[10px] text-gray-500">Cr</label><input type="text" id="mCr" value="0.04" class="w-full border rounded p-1 text-center font-mono"></div>
-            <div><label class="text-[10px] text-gray-500">Ni</label><input type="text" id="mNi" value="0.03" class="w-full border rounded p-1 text-center font-mono"></div>
-            <div><label class="text-[10px] text-gray-500">Mo</label><input type="text" id="mMo" value="0.0018" class="w-full border rounded p-1 text-center font-mono"></div>
+            <div><label class="text-[10px] text-gray-500">Si</label><input type="text" id="mSi" value="0.317" class="w-full border rounded p-1 text-center font-mono"></div>
+            <div><label class="text-[10px] text-gray-500">Cr</label><input type="text" id="mCr" value="0.18" class="w-full border rounded p-1 text-center font-mono"></div>
+            <div><label class="text-[10px] text-gray-500">Ni</label><input type="text" id="mNi" value="0.22" class="w-full border rounded p-1 text-center font-mono"></div>
+            <div><label class="text-[10px] text-gray-500">Mo</label><input type="text" id="mMo" value="0.08" class="w-full border rounded p-1 text-center font-mono"></div>
           </div>
           <div class="grid grid-cols-7 gap-1 mt-2">
-            <div><label class="text-[10px] text-gray-500">Cu</label><input type="text" id="mCu" value="0.03" class="w-full border rounded p-1 text-center font-mono"></div>
-            <div><label class="text-[10px] text-gray-500">V</label><input type="text" id="mV" value="0.0051" class="w-full border rounded p-1 text-center font-mono"></div>
-            <div><label class="text-[10px] text-gray-500">Al</label><input type="text" id="mAl" value="0" class="w-full border rounded p-1 text-center font-mono"></div>
-            <div><label class="text-[10px] text-gray-500">Ti</label><input type="text" id="mTi" value="0" class="w-full border rounded p-1 text-center font-mono"></div>
-            <div><label class="text-[10px] text-gray-500">B</label><input type="text" id="mB" value="0" class="w-full border rounded p-1 text-center font-mono"></div>
-            <div><label class="text-[10px] text-gray-500">Nb</label><input type="text" id="mNb" value="0" class="w-full border rounded p-1 text-center font-mono"></div>
-            <div><label class="text-[10px] text-gray-500">C.E.</label><input type="text" id="mCe" value="0.34" class="w-full border rounded p-1 text-center font-mono"></div>
+            <div><label class="text-[10px] text-gray-500">Cu</label><input type="text" id="mCu" value="0.14" class="w-full border rounded p-1 text-center font-mono"></div>
+            <div><label class="text-[10px] text-gray-500">V</label><input type="text" id="mV" value="0.07" class="w-full border rounded p-1 text-center font-mono"></div>
+            <div><label class="text-[10px] text-gray-500">Al</label><input type="text" id="mAl" value="-" class="w-full border rounded p-1 text-center font-mono"></div>
+            <div><label class="text-[10px] text-gray-500">Ti</label><input type="text" id="mTi" value="<0.001" class="w-full border rounded p-1 text-center font-mono"></div>
+            <div><label class="text-[10px] text-gray-500">B</label><input type="text" id="mB" value="0.0004" class="w-full border rounded p-1 text-center font-mono"></div>
+            <div><label class="text-[10px] text-gray-500">Nb</label><input type="text" id="mNb" value="0.01" class="w-full border rounded p-1 text-center font-mono"></div>
+            <div><label class="text-[10px] text-gray-500">C.E.</label><input type="text" id="mCe" value="0.35" class="w-full border rounded p-1 text-center font-mono"></div>
           </div>
         </div>
 
@@ -111,11 +111,11 @@
         <div class="sm:col-span-2 border-t pt-3">
           <p class="font-bold text-gray-800 mb-2 uppercase">Mechanical Properties:</p>
           <div class="grid grid-cols-5 gap-2">
-            <div><label class="text-[10px] text-gray-500">Tensile (Mpa)</label><input type="text" id="mTensile" value="558" class="w-full border rounded p-1 text-center font-mono"></div>
-            <div><label class="text-[10px] text-gray-500">Yield (Mpa)</label><input type="text" id="mYield" value="312" class="w-full border rounded p-1 text-center font-mono"></div>
-            <div><label class="text-[10px] text-gray-500">Elong (%)</label><input type="text" id="mElong" value="39" class="w-full border rounded p-1 text-center font-mono"></div>
-            <div><label class="text-[10px] text-gray-500">Ra (%)</label><input type="text" id="mRa" value="65" class="w-full border rounded p-1 text-center font-mono"></div>
-            <div><label class="text-[10px] text-gray-500">Hardness (HB)</label><input type="text" id="mHardness" value="136-155" class="w-full border rounded p-1 text-center font-mono"></div>
+            <div><label class="text-[10px] text-gray-500">Tensile</label><input type="text" id="mTensile" value="78320 PSI" class="w-full border rounded p-1 text-center font-mono"></div>
+            <div><label class="text-[10px] text-gray-500">Yield</label><input type="text" id="mYield" value="57290 PSI" class="w-full border rounded p-1 text-center font-mono"></div>
+            <div><label class="text-[10px] text-gray-500">Elong (%)</label><input type="text" id="mElong" value="42" class="w-full border rounded p-1 text-center font-mono"></div>
+            <div><label class="text-[10px] text-gray-500">Ra (%)</label><input type="text" id="mRa" value="-" class="w-full border rounded p-1 text-center font-mono"></div>
+            <div><label class="text-[10px] text-gray-500">Hardness</label><input type="text" id="mHardness" value="-" class="w-full border rounded p-1 text-center font-mono"></div>
           </div>
         </div>
 
@@ -125,16 +125,28 @@
         </div>
       </div>
 
-      <div class="mt-6">
-        <button onclick="generateManualCertificate()" class="w-full bg-amber-700 hover:bg-amber-800 text-white font-bold py-3.5 rounded text-base shadow-lg transition flex items-center justify-center gap-2">
-          ⚡ Generate Certificate from Form
+      <!-- Action Buttons -->
+      <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <button onclick="generateManualCertificate()" class="bg-amber-700 hover:bg-amber-800 text-white font-bold py-3 rounded text-sm shadow transition flex items-center justify-center gap-2">
+          ⚡ Preview & Print Certificate
+        </button>
+        <button onclick="generateDatabaseJSON()" class="bg-blue-800 hover:bg-blue-900 text-white font-bold py-3 rounded text-sm shadow transition flex items-center justify-center gap-2">
+          💾 Generate JSON Code to Save in Database
         </button>
       </div>
     </div>
 
+    <!-- JSON Export Modal Box (Hidden until clicked) -->
+    <div id="jsonOutputContainer" class="hidden bg-slate-900 text-green-400 p-6 rounded-lg shadow-lg mb-8 no-print border-2 border-green-500">
+      <h3 class="text-sm font-bold text-white mb-2">📋 Database JSON Code (Add this to your `mtr-database.json` file on GitHub):</h3>
+      <p class="text-xs text-gray-300 mb-3">Copy this block and paste it inside the square brackets `[...]` of your `mtr-database.json` file so customers can look up this heat code instantly on your website:</p>
+      <textarea id="jsonOutputText" rows="6" readonly class="w-full bg-black text-green-400 font-mono text-xs p-3 rounded border border-gray-700 focus:outline-none"></textarea>
+      <button onclick="copyJSONCode()" class="mt-3 bg-green-700 hover:bg-green-800 text-white font-semibold px-4 py-1.5 rounded text-xs transition">📋 Copy Code to Clipboard</button>
+    </div>
+
     <!-- Print Button Bar -->
     <div id="actionToolbar" class="hidden flex justify-between items-center mb-4 no-print bg-green-50 p-3 rounded border border-green-300">
-      <h2 class="text-sm font-bold text-green-900">✓ MTR Certificate Generated Successfully!</h2>
+      <h2 class="text-sm font-bold text-green-900">✓ MTR Certificate Ready</h2>
       <button onclick="window.print()" class="bg-green-700 hover:bg-green-800 text-white font-semibold px-5 py-2 rounded shadow text-sm transition flex items-center gap-2">
         🖨️ Print / Save Certificate
       </button>
@@ -242,11 +254,11 @@
         <table class="w-full border-collapse border border-gray-400 text-center">
           <thead>
             <tr class="bg-gray-100 text-[10px]">
-              <th class="border border-gray-400 p-1">Tensile (Mpa)</th>
-              <th class="border border-gray-400 p-1">Yield (Mpa)</th>
+              <th class="border border-gray-400 p-1">Tensile</th>
+              <th class="border border-gray-400 p-1">Yield</th>
               <th class="border border-gray-400 p-1">Elong (%)</th>
               <th class="border border-gray-400 p-1">Ra (%)</th>
-              <th class="border border-gray-400 p-1">Hardness (HB)</th>
+              <th class="border border-gray-400 p-1">Hardness</th>
             </tr>
           </thead>
           <tbody>
@@ -331,7 +343,6 @@
         document.getElementById('mComments').value = record.comments || '';
 
         generateManualCertificate();
-
       } catch (e) {
         console.error(e);
       }
@@ -375,18 +386,64 @@
 
         document.getElementById('lblComments').innerText = getVal('mComments', '');
 
-        // Show preview and action toolbar by removing hidden class
         const certBox = document.getElementById('printable-certificate');
         const toolbar = document.getElementById('actionToolbar');
         
         certBox.classList.remove('hidden');
         toolbar.classList.remove('hidden');
-        
-        // Smooth scroll to preview
         certBox.scrollIntoView({ behavior: 'smooth' });
       } catch (err) {
         alert("Error generating certificate: " + err.message);
       }
+    }
+
+    function generateDatabaseJSON() {
+      const record = {
+        "heat": document.getElementById('manualHeat').value.trim(),
+        "description": document.getElementById('manualDesc').value.trim(),
+        "specs": document.getElementById('manualSpecs').value.trim(),
+        "heatTreatment": document.getElementById('manualHeatTreat').value.trim(),
+        "dimension": document.getElementById('manualDim').value.trim(),
+        "threads": "",
+        "chem": {
+          "c": document.getElementById('mC').value.trim(),
+          "mn": document.getElementById('mMn').value.trim(),
+          "p": document.getElementById('mP').value.trim(),
+          "s": document.getElementById('mS').value.trim(),
+          "si": document.getElementById('mSi').value.trim(),
+          "cr": document.getElementById('mCr').value.trim(),
+          "ni": document.getElementById('mNi').value.trim(),
+          "mo": document.getElementById('mMo').value.trim(),
+          "cu": document.getElementById('mCu').value.trim(),
+          "v": document.getElementById('mV').value.trim(),
+          "al": document.getElementById('mAl').value.trim(),
+          "ti": document.getElementById('mTi').value.trim(),
+          "b": document.getElementById('mB').value.trim(),
+          "nb": document.getElementById('mNb').value.trim(),
+          "ce": document.getElementById('mCe').value.trim()
+        },
+        "mech": {
+          "tensile": document.getElementById('mTensile').value.trim(),
+          "yield": document.getElementById('mYield').value.trim(),
+          "elong": document.getElementById('mElong').value.trim(),
+          "ra": document.getElementById('mRa').value.trim(),
+          "hardness": document.getElementById('mHardness').value.trim()
+        },
+        "comments": document.getElementById('mComments').value.trim()
+      };
+
+      const jsonString = JSON.stringify(record, null, 2);
+      document.getElementById('jsonOutputText').value = jsonString;
+      const box = document.getElementById('jsonOutputContainer');
+      box.classList.remove('hidden');
+      box.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function copyJSONCode() {
+      const copyText = document.getElementById('jsonOutputText');
+      copyText.select();
+      document.execCommand('copy');
+      alert('✓ JSON Code copied to clipboard! Paste it into your mtr-database.json file on GitHub.');
     }
   </script>
 </body>
