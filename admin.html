@@ -130,4 +130,321 @@
         <button onclick="generateManualCertificate()" class="bg-amber-700 hover:bg-amber-800 text-white font-bold py-3 rounded text-sm shadow transition flex items-center justify-center gap-2">
           ⚡ Preview & Print Certificate
         </button>
-        <button onclick="generateDatabaseJSON()" class="bg-blue-800 hover:bg-blue-900 text-white font-bold py-3 rounded text-sm shadow transition flex
+        <button onclick="generateDatabaseJSON()" class="bg-blue-800 hover:bg-blue-900 text-white font-bold py-3 rounded text-sm shadow transition flex items-center justify-center gap-2">
+          💾 Generate JSON Code to Save in Database
+        </button>
+      </div>
+    </div>
+
+    <!-- JSON Export Box -->
+    <div id="jsonOutputContainer" class="hidden bg-slate-900 text-green-400 p-6 rounded-lg shadow-lg mb-8 no-print border-2 border-green-500">
+      <h3 class="text-sm font-bold text-white mb-2">📋 Database JSON Code (Add this to your `mtr-database.json` file on GitHub):</h3>
+      <p class="text-xs text-gray-300 mb-3">Copy this block and paste it inside the square brackets `[...]` of your `mtr-database.json` file so customers can look up this heat code instantly on your website:</p>
+      <textarea id="jsonOutputText" rows="6" readonly class="w-full bg-black text-green-400 font-mono text-xs p-3 rounded border border-gray-700 focus:outline-none"></textarea>
+      <button onclick="copyJSONCode()" class="mt-3 bg-green-700 hover:bg-green-800 text-white font-semibold px-4 py-1.5 rounded text-xs transition">📋 Copy Code to Clipboard</button>
+    </div>
+
+    <!-- Print Button Bar -->
+    <div id="actionToolbar" class="hidden flex justify-between items-center mb-4 no-print bg-green-50 p-3 rounded border border-green-300">
+      <h2 class="text-sm font-bold text-green-900">✓ MTR Certificate Ready</h2>
+      <button onclick="window.print()" class="bg-green-700 hover:bg-green-800 text-white font-semibold px-5 py-2 rounded shadow text-sm transition flex items-center gap-2">
+        🖨️ Print / Save Certificate
+      </button>
+    </div>
+
+    <!-- Printable MTR Certificate Template -->
+    <div id="printable-certificate" class="hidden bg-white p-8 rounded-lg shadow border border-gray-300 text-xs">
+      
+      <!-- Company Header -->
+      <div class="flex justify-between items-start border-b-2 border-[#1B365D] pb-4 mb-4">
+        <div>
+          <h2 class="text-xl font-black text-[#1B365D]">TITAN FLOW PRODUCTS INC.</h2>
+          <p class="text-[10px] text-gray-600">8524 Roper Road NW, Edmonton, AB T6E 6V4, Canada</p>
+          <p class="text-[10px] text-gray-600">TOLL FREE: (587)-410-8373 | www.titanflowproducts.com</p>
+        </div>
+        <div class="text-right">
+          <h3 class="text-lg font-bold text-gray-800">Material Test Report</h3>
+          <p class="text-[10px] font-mono text-gray-500">CERT NO: <span id="lblCertNo">MC26022600048</span></p>
+        </div>
+      </div>
+
+      <!-- Product Description Section -->
+      <div class="mb-4">
+        <p class="text-[10px] font-bold text-gray-500 uppercase">Product Description:</p>
+        <div id="lblDescription" class="border border-gray-400 p-2 font-bold text-gray-900 mt-0.5 bg-gray-50"></div>
+      </div>
+
+      <!-- Specs & Heat Code Grid -->
+      <div class="grid grid-cols-4 gap-2 mb-4 border border-gray-400 p-2 bg-gray-50">
+        <div class="col-span-3">
+          <p class="text-[10px] font-bold text-gray-500 uppercase">****Specifications****</p>
+          <p id="lblSpecs" class="font-semibold text-gray-800 mt-0.5"></p>
+        </div>
+        <div class="col-span-1 border-l border-gray-400 pl-2">
+          <p class="text-[10px] font-bold text-gray-500 uppercase">Heat Code:</p>
+          <p id="lblHeat" class="font-mono font-bold text-sm text-blue-900 mt-0.5"></p>
+        </div>
+      </div>
+
+      <!-- Additional Spec Details -->
+      <div class="mb-4 text-[11px] space-y-1">
+        <p><strong>Heat treatment:</strong> <span id="lblHeatTreatment"></span></p>
+        <p><strong>Dimension / Threads:</strong> <span id="lblDimension"></span></p>
+      </div>
+
+      <!-- Chemical Properties Table -->
+      <div class="mb-4">
+        <p class="font-bold text-gray-700 uppercase mb-1">Chemical Properties:</p>
+        <table class="w-full border-collapse border border-gray-400 text-center">
+          <thead>
+            <tr class="bg-gray-100 text-[10px]">
+              <th class="border border-gray-400 p-1">C</th>
+              <th class="border border-gray-400 p-1">Mn</th>
+              <th class="border border-gray-400 p-1">P</th>
+              <th class="border border-gray-400 p-1">S</th>
+              <th class="border border-gray-400 p-1">Si</th>
+              <th class="border border-gray-400 p-1">Cr</th>
+              <th class="border border-gray-400 p-1">Ni</th>
+              <th class="border border-gray-400 p-1">Mo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="font-mono">
+              <td class="border border-gray-400 p-1" id="chemC">-</td>
+              <td class="border border-gray-400 p-1" id="chemMn">-</td>
+              <td class="border border-gray-400 p-1" id="chemP">-</td>
+              <td class="border border-gray-400 p-1" id="chemS">-</td>
+              <td class="border border-gray-400 p-1" id="chemSi">-</td>
+              <td class="border border-gray-400 p-1" id="chemCr">-</td>
+              <td class="border border-gray-400 p-1" id="chemNi">-</td>
+              <td class="border border-gray-400 p-1" id="chemMo">-</td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <table class="w-full border-collapse border border-gray-400 text-center mt-2">
+          <thead>
+            <tr class="bg-gray-100 text-[10px]">
+              <th class="border border-gray-400 p-1">Cu</th>
+              <th class="border border-gray-400 p-1">V</th>
+              <th class="border border-gray-400 p-1">Al</th>
+              <th class="border border-gray-400 p-1">Ti</th>
+              <th class="border border-gray-400 p-1">B</th>
+              <th class="border border-gray-400 p-1">Nb</th>
+              <th class="border border-gray-400 p-1">C.E.</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="font-mono">
+              <td class="border border-gray-400 p-1" id="chemCu">-</td>
+              <td class="border border-gray-400 p-1" id="chemV">-</td>
+              <td class="border border-gray-400 p-1" id="chemAl">-</td>
+              <td class="border border-gray-400 p-1" id="chemTi">-</td>
+              <td class="border border-gray-400 p-1" id="chemB">-</td>
+              <td class="border border-gray-400 p-1" id="chemNb">-</td>
+              <td class="border border-gray-400 p-1" id="chemCe">-</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mechanical Properties Table -->
+      <div class="mb-4">
+        <p class="font-bold text-gray-700 uppercase mb-1">Mechanical Properties:</p>
+        <table class="w-full border-collapse border border-gray-400 text-center">
+          <thead>
+            <tr class="bg-gray-100 text-[10px]">
+              <th class="border border-gray-400 p-1">Tensile</th>
+              <th class="border border-gray-400 p-1">Yield</th>
+              <th class="border border-gray-400 p-1">Elong (%)</th>
+              <th class="border border-gray-400 p-1">Ra (%)</th>
+              <th class="border border-gray-400 p-1">Hardness</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="font-mono">
+              <td class="border border-gray-400 p-1" id="mechTensile">-</td>
+              <td class="border border-gray-400 p-1" id="mechYield">-</td>
+              <td class="border border-gray-400 p-1" id="mechElong">-</td>
+              <td class="border border-gray-400 p-1" id="mechRa">-</td>
+              <td class="border border-gray-400 p-1" id="mechHardness">-</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Additional Comments & Signoff -->
+      <div class="border-t border-gray-400 pt-3 mt-4 flex justify-between items-end">
+        <div class="w-2/3">
+          <p class="font-bold text-gray-700 uppercase text-[10px]">Additional Comments:</p>
+          <p id="lblComments" class="text-[10px] text-gray-600 mt-1 whitespace-pre-line"></p>
+        </div>
+        <div class="text-center w-1/3 border-l pl-4">
+          <div class="h-12 flex items-center justify-center font-serif italic text-blue-900 font-bold">Titan QC Dept</div>
+          <p class="border-t border-gray-400 pt-1 text-[10px] font-bold text-gray-700 uppercase">QC MANAGER AND INSPECTOR</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- No Results Box -->
+    <div id="noResults" class="hidden bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-lg p-6 text-center mt-6">
+      <p class="font-bold">No MTR record found in `mtr-database.json` for that Heat Code.</p>
+    </div>
+  </main>
+
+  <script>
+    async function performSearch() {
+      const input = document.getElementById('searchInput').value.trim().toUpperCase();
+      const noResBox = document.getElementById('noResults');
+      if (noResBox) noResBox.classList.add('hidden');
+
+      if (!input) return;
+
+      try {
+        const response = await fetch('mtr-database.json');
+        const db = response.ok ? await response.json() : [];
+        const record = db.find(item => item.heat.toUpperCase() === input);
+
+        if (!record) {
+          if (noResBox) noResBox.classList.remove('hidden');
+          return;
+        }
+
+        document.getElementById('manualHeat').value = record.heat || '';
+        document.getElementById('manualDesc').value = record.description || '';
+        document.getElementById('manualSpecs').value = record.specs || '';
+        document.getElementById('manualHeatTreat').value = record.heatTreatment || '';
+        document.getElementById('manualDim').value = (record.dimension || '') + ' / ' + (record.threads || '');
+        
+        const c = record.chem || {};
+        document.getElementById('mC').value = c.c || '';
+        document.getElementById('mMn').value = c.mn || '';
+        document.getElementById('mP').value = c.p || '';
+        document.getElementById('mS').value = c.s || '';
+        document.getElementById('mSi').value = c.si || '';
+        document.getElementById('mCr').value = c.cr || '';
+        document.getElementById('mNi').value = c.ni || '';
+        document.getElementById('mMo').value = c.mo || '';
+        document.getElementById('mCu').value = c.cu || '';
+        document.getElementById('mV').value = c.v || '';
+        document.getElementById('mAl').value = c.al || '';
+        document.getElementById('mTi').value = c.ti || '';
+        document.getElementById('mB').value = c.b || '';
+        document.getElementById('mNb').value = c.nb || '';
+        document.getElementById('mCe').value = c.ce || '';
+
+        const m = record.mech || {};
+        document.getElementById('mTensile').value = m.tensile || '';
+        document.getElementById('mYield').value = m.yield || '';
+        document.getElementById('mElong').value = m.elong || '';
+        document.getElementById('mRa').value = m.ra || '';
+        document.getElementById('mHardness').value = m.hardness || '';
+        document.getElementById('mComments').value = record.comments || '';
+
+        generateManualCertificate();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function generateManualCertificate() {
+      try {
+        const getVal = (id, fallback) => {
+          const el = document.getElementById(id);
+          return el && el.value ? el.value : fallback;
+        };
+
+        document.getElementById('lblCertNo').innerText = getVal('manualCert', 'MC26022600048');
+        document.getElementById('lblHeat').innerText = getVal('manualHeat', 'N/A');
+        document.getElementById('lblDescription').innerText = getVal('manualDesc', 'N/A');
+        document.getElementById('lblSpecs').innerText = getVal('manualSpecs', 'N/A');
+        document.getElementById('lblHeatTreatment').innerText = getVal('manualHeatTreat', 'N/A');
+        document.getElementById('lblDimension').innerText = getVal('manualDim', 'N/A');
+
+        document.getElementById('chemC').innerText = getVal('mC', '-');
+        document.getElementById('chemMn').innerText = getVal('mMn', '-');
+        document.getElementById('chemP').innerText = getVal('mP', '-');
+        document.getElementById('chemS').innerText = getVal('mS', '-');
+        document.getElementById('chemSi').innerText = getVal('mSi', '-');
+        document.getElementById('chemCr').innerText = getVal('mCr', '-');
+        document.getElementById('chemNi').innerText = getVal('mNi', '-');
+        document.getElementById('chemMo').innerText = getVal('mMo', '-');
+        document.getElementById('chemCu').innerText = getVal('mCu', '-');
+        document.getElementById('chemV').innerText = getVal('mV', '-');
+        document.getElementById('chemAl').innerText = getVal('mAl', '-');
+        document.getElementById('chemTi').innerText = getVal('mTi', '-');
+        document.getElementById('chemB').innerText = getVal('mB', '-');
+        document.getElementById('chemNb').innerText = getVal('mNb', '-');
+        document.getElementById('chemCe').innerText = getVal('mCe', '-');
+
+        document.getElementById('mechTensile').innerText = getVal('mTensile', '-');
+        document.getElementById('mechYield').innerText = getVal('mYield', '-');
+        document.getElementById('mechElong').innerText = getVal('mElong', '-');
+        document.getElementById('mechRa').innerText = getVal('mRa', '-');
+        document.getElementById('mechHardness').innerText = getVal('mHardness', '-');
+
+        document.getElementById('lblComments').innerText = getVal('mComments', '');
+
+        const certBox = document.getElementById('printable-certificate');
+        const toolbar = document.getElementById('actionToolbar');
+        
+        certBox.classList.remove('hidden');
+        toolbar.classList.remove('hidden');
+        certBox.scrollIntoView({ behavior: 'smooth' });
+      } catch (err) {
+        alert("Error generating certificate: " + err.message);
+      }
+    }
+
+    function generateDatabaseJSON() {
+      const record = {
+        "heat": document.getElementById('manualHeat').value.trim(),
+        "description": document.getElementById('manualDesc').value.trim(),
+        "specs": document.getElementById('manualSpecs').value.trim(),
+        "heatTreatment": document.getElementById('manualHeatTreat').value.trim(),
+        "dimension": document.getElementById('manualDim').value.trim(),
+        "threads": "",
+        "chem": {
+          "c": document.getElementById('mC').value.trim(),
+          "mn": document.getElementById('mMn').value.trim(),
+          "p": document.getElementById('mP').value.trim(),
+          "s": document.getElementById('mS').value.trim(),
+          "si": document.getElementById('mSi').value.trim(),
+          "cr": document.getElementById('mCr').value.trim(),
+          "ni": document.getElementById('mNi').value.trim(),
+          "mo": document.getElementById('mMo').value.trim(),
+          "cu": document.getElementById('mCu').value.trim(),
+          "v": document.getElementById('mV').value.trim(),
+          "al": document.getElementById('mAl').value.trim(),
+          "ti": document.getElementById('mTi').value.trim(),
+          "b": document.getElementById('mB').value.trim(),
+          "nb": document.getElementById('mNb').value.trim(),
+          "ce": document.getElementById('mCe').value.trim()
+        },
+        "mech": {
+          "tensile": document.getElementById('mTensile').value.trim(),
+          "yield": document.getElementById('mYield').value.trim(),
+          "elong": document.getElementById('mElong').value.trim(),
+          "ra": document.getElementById('mRa').value.trim(),
+          "hardness": document.getElementById('mHardness').value.trim()
+        },
+        "comments": document.getElementById('mComments').value.trim()
+      };
+
+      const jsonString = JSON.stringify(record, null, 2);
+      document.getElementById('jsonOutputText').value = jsonString;
+      const box = document.getElementById('jsonOutputContainer');
+      box.classList.remove('hidden');
+      box.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function copyJSONCode() {
+      const copyText = document.getElementById('jsonOutputText');
+      copyText.select();
+      document.execCommand('copy');
+      alert('✓ JSON Code copied to clipboard! Paste it into your mtr-database.json file on GitHub.');
+    }
+  </script>
+</body>
+</html>
