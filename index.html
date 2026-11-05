@@ -15,10 +15,11 @@
         top: 0 !important; 
         width: 100% !important; 
         margin: 0 !important; 
-        padding: 0 !important; 
+        padding: 10px !important; 
+        background: white !important;
       }
       .no-print { display: none !important; }
-      iframe { display: none !important; } /* Hide iframe during page print to prevent multi-page overflow */
+      @page { size: auto; margin: 10mm; }
     }
   </style>
 </head>
@@ -27,201 +28,277 @@
   <!-- Header -->
   <header class="bg-[#1B365D] text-white shadow-md no-print">
     <div class="max-w-6xl mx-auto px-4 py-4 flex flex-wrap justify-between items-center">
-      <div class="flex items-center space-x-4">
-        <div class="bg-white p-2 rounded shadow-sm flex items-center justify-center">
-          <svg class="h-10 w-auto" viewBox="0 0 200 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <text x="5" y="45" font-family="Arial, sans-serif" font-weight="900" font-size="48" fill="#1B365D" letter-spacing="-2">T</text>
-            <text x="32" y="45" font-family="Arial, sans-serif" font-weight="900" font-size="48" fill="#0056B3" letter-spacing="-2">P</text>
-            <text x="5" y="65" font-family="Arial, sans-serif" font-weight="bold" font-size="16" fill="#1B365D">Titan</text>
-            <text x="5" y="77" font-family="Arial, sans-serif" font-weight="bold" font-size="9" fill="#0056B3" letter-spacing="0.5">FLOW PRODUCTS</text>
-          </svg>
+      <div class="flex items-center space-x-3">
+        <div class="bg-white p-2 rounded shadow">
+          <span class="text-[#1B365D] font-black text-lg tracking-tighter">TP</span>
+          <p class="text-[8px] text-gray-600 uppercase tracking-widest">Titan</p>
         </div>
         <div>
-          <h1 class="text-xl font-bold tracking-wide">TITAN FLOW PRODUCTS INC.</h1>
+          <h1 class="text-lg font-bold tracking-wide">TITAN FLOW PRODUCTS INC.</h1>
           <p class="text-xs text-gray-300">Certified Material Test Report (MTR) Self-Service Portal</p>
         </div>
       </div>
       <div class="text-right text-xs text-gray-200 mt-2 sm:mt-0">
         <p class="font-semibold">8524 Roper Road NW, Edmonton, AB T6E 6V4</p>
         <p>PH: (587) 410-8373 | Mon - Fri: 8:00 AM – 5:00 PM</p>
-        <button onclick="toggleAdminModal()" class="mt-1 text-xs bg-blue-800 hover:bg-blue-700 text-white px-3 py-1 rounded shadow transition">Staff Access</button>
+        <a href="admin.html" class="inline-block mt-1 bg-blue-700 hover:bg-blue-800 text-white font-bold px-3 py-1 rounded text-[11px] shadow transition">Staff Access</a>
       </div>
     </div>
   </header>
 
   <!-- Main Content -->
-  <main class="max-w-5xl mx-auto w-full px-4 py-8 flex-grow">
+  <main class="max-w-4xl mx-auto w-full px-4 py-8 flex-grow">
     
-    <!-- Search Box -->
+    <!-- Search Box Card -->
     <div class="bg-white rounded-lg shadow-md p-6 mb-8 no-print border-t-4 border-[#1B365D]">
-      <h2 class="text-lg font-bold text-[#1B365D] mb-2">Search Material Test Reports</h2>
-      <p class="text-sm text-gray-600 mb-4">Enter the <strong>Heat Code</strong> stamped on your fitting or component to pull up the certified Mill Test Report.</p>
+      <h2 class="text-lg font-bold text-[#1B365D] mb-1">Search Material Test Reports</h2>
+      <p class="text-xs text-gray-600 mb-4">Enter the <strong>Heat Code</strong> stamped on your fitting or component to pull up the certified Mill Test Report.</p>
       
       <div class="flex flex-col sm:flex-row gap-3">
-        <input type="text" id="searchInput" placeholder="Enter Heat # (e.g. T663401)..." class="flex-grow border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600" onkeydown="if(event.key === 'Enter') performSearch()">
-        <button onclick="performSearch()" class="bg-[#1B365D] hover:bg-blue-900 text-white font-semibold px-6 py-2 rounded transition">Search MTR</button>
+        <input type="text" id="searchInput" placeholder="Enter Heat # (e.g. T642576)..." class="flex-grow border border-gray-300 rounded px-4 py-2.5 text-sm uppercase font-mono font-bold text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-600" onkeydown="if(event.key === 'Enter') searchMTR()">
+        <button onclick="searchMTR()" class="bg-[#1B365D] hover:bg-blue-900 text-white font-semibold px-8 py-2.5 rounded text-sm shadow transition">Search MTR</button>
       </div>
     </div>
 
-    <!-- Multi-Item Selector -->
-    <div id="selectionContainer" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 no-print">
-      <h3 class="text-sm font-bold text-[#1B365D] mb-1">Matching Products Found for Heat <span id="selHeatNum" class="font-mono"></span></h3>
-      <p class="text-xs text-gray-600 mb-3">Please select the specific product description matching your component:</p>
-      <div id="itemList" class="space-y-2"></div>
+    <!-- Error / Not Found Box -->
+    <div id="noResults" class="hidden bg-amber-50 border border-amber-300 text-amber-900 rounded-lg p-6 text-center mb-6 no-print shadow-sm">
+      <h3 class="font-bold text-sm mb-1">No MTR PDF found for that Heat Code.</h3>
+      <p class="text-xs text-amber-800">Please verify the heat number stamped on your component or contact Titan Flow Products at <strong>(587) 410-8373</strong>.</p>
     </div>
 
-    <!-- Search Results / PDF Viewer Container -->
-    <div id="resultsContainer" class="hidden">
+    <!-- Printable Certificate View (Hidden initially) -->
+    <div id="printable-area" class="hidden bg-white p-8 rounded-lg shadow border border-gray-300 text-xs mb-8">
       
-      <!-- Custom Description Input -->
-      <div class="bg-amber-50 border-2 border-amber-400 rounded-lg p-4 mb-6 no-print shadow-md">
-        <h3 class="text-sm font-bold text-amber-900 mb-1">📝 Custom Line Item Description / PO Tag (Optional)</h3>
-        <p class="text-xs text-amber-800 mb-2">Type your custom part description or PO tag below:</p>
-        <input type="text" id="customDescInput" oninput="updateCustomDesc()" placeholder="e.g. 2 X 6 S160 A106B BLK SMLS NPL TBE / PO #9042" class="w-full border-2 border-amber-500 bg-white rounded px-3 py-2 text-sm font-semibold text-gray-800 focus:outline-none">
-      </div>
-
-      <div class="flex flex-wrap justify-between items-center mb-4 no-print gap-3">
-        <h2 class="text-xl font-bold text-gray-800" id="displayProductDesc">Official Mill Test Report Document</h2>
-        <div class="flex gap-2">
-          <a id="openFullPdfBtn" href="" target="_blank" class="bg-blue-700 hover:bg-blue-800 text-white font-semibold px-4 py-2 rounded shadow text-sm transition flex items-center gap-2">
-            📄 Open / Print Full PDF
-          </a>
-          <button onclick="window.print()" class="bg-green-700 hover:bg-green-800 text-white font-semibold px-4 py-2 rounded shadow text-sm transition flex items-center gap-2">
-            🖨️ Print Custom Tag
-          </button>
+      <!-- Company Header -->
+      <div class="flex justify-between items-start border-b-2 border-[#1B365D] pb-4 mb-4">
+        <div>
+          <h2 class="text-xl font-black text-[#1B365D]">TITAN FLOW PRODUCTS INC.</h2>
+          <p class="text-[10px] text-gray-600">8524 Roper Road NW, Edmonton, AB T6E 6V4, Canada</p>
+          <p class="text-[10px] text-gray-600">TOLL FREE: (587)-410-8373 | www.titanflowproducts.com</p>
+        </div>
+        <div class="text-right">
+          <h3 class="text-lg font-bold text-gray-800">Material Test Report</h3>
+          <p class="text-[10px] font-mono text-gray-500">CERT NO: <span id="lblCertNo">MC26022600048</span></p>
         </div>
       </div>
 
-      <!-- Printable Area -->
-      <div id="printable-area" class="bg-white p-4 rounded-lg shadow border border-gray-200">
+      <!-- Customer Custom Description Section -->
+      <div class="mb-4 no-print bg-blue-50 border border-blue-200 p-3 rounded">
+        <label class="block font-bold text-blue-900 text-[11px] mb-1">Custom Purchase Order / Line Item Description (Optional):</label>
+        <p class="text-[10px] text-blue-700 mb-2">You can type or adjust your project description below before printing or saving your certificate:</p>
+        <input type="text" id="customerDescInput" class="w-full border border-blue-300 rounded p-2 bg-white font-bold text-gray-900 text-xs shadow-inner">
+      </div>
+
+      <!-- Product Description Display for Print -->
+      <div class="mb-4">
+        <p class="text-[10px] font-bold text-gray-500 uppercase">Product Description:</p>
+        <div id="lblDescription" class="border border-gray-400 p-2 font-bold text-gray-900 mt-0.5 bg-gray-50"></div>
+      </div>
+
+      <!-- Specs & Heat Code Grid -->
+      <div class="grid grid-cols-4 gap-2 mb-4 border border-gray-400 p-2 bg-gray-50">
+        <div class="col-span-3">
+          <p class="text-[10px] font-bold text-gray-500 uppercase">****Specifications****</p>
+          <p id="lblSpecs" class="font-semibold text-gray-800 mt-0.5"></p>
+        </div>
+        <div class="col-span-1 border-l border-gray-400 pl-2">
+          <p class="text-[10px] font-bold text-gray-500 uppercase">Heat Code:</p>
+          <p id="lblHeat" class="font-mono font-bold text-sm text-blue-900 mt-0.5"></p>
+        </div>
+      </div>
+
+      <!-- Additional Spec Details -->
+      <div class="mb-4 text-[11px] space-y-1">
+        <p><strong>Heat treatment:</strong> <span id="lblHeatTreatment"></span></p>
+        <p><strong>Dimension / Threads:</strong> <span id="lblDimension"></span></p>
+      </div>
+
+      <!-- Chemical Properties Table -->
+      <div class="mb-4">
+        <p class="font-bold text-gray-700 uppercase mb-1">Chemical Properties:</p>
+        <table class="w-full border-collapse border border-gray-400 text-center">
+          <thead>
+            <tr class="bg-gray-100 text-[10px]">
+              <th class="border border-gray-400 p-1">C</th>
+              <th class="border border-gray-400 p-1">Mn</th>
+              <th class="border border-gray-400 p-1">P</th>
+              <th class="border border-gray-400 p-1">S</th>
+              <th class="border border-gray-400 p-1">Si</th>
+              <th class="border border-gray-400 p-1">Cr</th>
+              <th class="border border-gray-400 p-1">Ni</th>
+              <th class="border border-gray-400 p-1">Mo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="font-mono">
+              <td class="border border-gray-400 p-1" id="chemC">-</td>
+              <td class="border border-gray-400 p-1" id="chemMn">-</td>
+              <td class="border border-gray-400 p-1" id="chemP">-</td>
+              <td class="border border-gray-400 p-1" id="chemS">-</td>
+              <td class="border border-gray-400 p-1" id="chemSi">-</td>
+              <td class="border border-gray-400 p-1" id="chemCr">-</td>
+              <td class="border border-gray-400 p-1" id="chemNi">-</td>
+              <td class="border border-gray-400 p-1" id="chemMo">-</td>
+            </tr>
+          </tbody>
+        </table>
         
-        <!-- Custom Header Tag -->
-        <div id="customDescDisplayBox" class="hidden mb-4 pb-3 border-b-2 border-blue-900 bg-yellow-100 p-3 rounded">
-          <p class="text-[10px] font-bold text-yellow-900 uppercase tracking-wider">Custom Line Item Description / PO Tag:</p>
-          <p id="resCustomDesc" class="text-sm font-bold text-gray-900 mt-1"></p>
-        </div>
+        <table class="w-full border-collapse border border-gray-400 text-center mt-2">
+          <thead>
+            <tr class="bg-gray-100 text-[10px]">
+              <th class="border border-gray-400 p-1">Cu</th>
+              <th class="border border-gray-400 p-1">V</th>
+              <th class="border border-gray-400 p-1">Al</th>
+              <th class="border border-gray-400 p-1">Ti</th>
+              <th class="border border-gray-400 p-1">B</th>
+              <th class="border border-gray-400 p-1">Nb</th>
+              <th class="border border-gray-400 p-1">C.E.</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="font-mono">
+              <td class="border border-gray-400 p-1" id="chemCu">-</td>
+              <td class="border border-gray-400 p-1" id="chemV">-</td>
+              <td class="border border-gray-400 p-1" id="chemAl">-</td>
+              <td class="border border-gray-400 p-1" id="chemTi">-</td>
+              <td class="border border-gray-400 p-1" id="chemB">-</td>
+              <td class="border border-gray-400 p-1" id="chemNb">-</td>
+              <td class="border border-gray-400 p-1" id="chemCe">-</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-        <!-- Official Manufacturer PDF Viewer -->
-        <div class="w-full">
-          <iframe id="pdfViewerIframe" src="" width="100%" height="850px" class="border border-gray-300 rounded"></iframe>
+      <!-- Mechanical Properties Table -->
+      <div class="mb-4">
+        <p class="font-bold text-gray-700 uppercase mb-1">Mechanical Properties:</p>
+        <table class="w-full border-collapse border border-gray-400 text-center">
+          <thead>
+            <tr class="bg-gray-100 text-[10px]">
+              <th class="border border-gray-400 p-1">Tensile</th>
+              <th class="border border-gray-400 p-1">Yield</th>
+              <th class="border border-gray-400 p-1">Elong (%)</th>
+              <th class="border border-gray-400 p-1">Ra (%)</th>
+              <th class="border border-gray-400 p-1">Hardness</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="font-mono">
+              <td class="border border-gray-400 p-1" id="mechTensile">-</td>
+              <td class="border border-gray-400 p-1" id="mechYield">-</td>
+              <td class="border border-gray-400 p-1" id="mechElong">-</td>
+              <td class="border border-gray-400 p-1" id="mechRa">-</td>
+              <td class="border border-gray-400 p-1" id="mechHardness">-</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Additional Comments & Signoff -->
+      <div class="border-t border-gray-400 pt-3 mt-4 flex justify-between items-end">
+        <div class="w-2/3">
+          <p class="font-bold text-gray-700 uppercase text-[10px]">Additional Comments:</p>
+          <p id="lblComments" class="text-[10px] text-gray-600 mt-1 whitespace-pre-line"></p>
+        </div>
+        <div class="text-center w-1/3 border-l pl-4">
+          <div class="h-12 flex items-center justify-center font-serif italic text-blue-900 font-bold">Titan QC Dept</div>
+          <p class="border-t border-gray-400 pt-1 text-[10px] font-bold text-gray-700 uppercase">QC MANAGER AND INSPECTOR</p>
         </div>
       </div>
+
     </div>
 
-    <!-- No Results Box -->
-    <div id="noResults" class="hidden bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-lg p-6 text-center">
-      <p class="font-bold">No MTR PDF found for that Heat Code.</p>
-      <p class="text-sm mt-1">Please verify the heat number stamped on your component or contact Titan Flow Products at <strong>(587) 410-8373</strong>.</p>
+    <!-- Print Action Bar -->
+    <div id="printActionBar" class="hidden no-print bg-green-50 border border-green-300 p-4 rounded-lg shadow-md flex justify-between items-center mb-8">
+      <div>
+        <h3 class="font-bold text-green-900 text-sm">✓ MTR Certificate Found</h3>
+        <p class="text-xs text-green-700">Review details above, customize your description if needed, then print or save as PDF.</p>
+      </div>
+      <button onclick="window.print()" class="bg-green-700 hover:bg-green-800 text-white font-bold px-6 py-2.5 rounded shadow text-sm transition flex items-center gap-2">
+        🖨️ Print / Save Certificate PDF
+      </button>
     </div>
+
   </main>
 
-  <!-- Staff Admin Modal -->
-  <div id="adminModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 no-print">
-    <div class="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
-      <h3 class="text-lg font-bold text-[#1B365D] mb-4">Staff Portal Access</h3>
-      <div id="adminAuth">
-        <p class="text-sm text-gray-600 mb-3">Enter staff passcode to access management controls:</p>
-        <input type="password" id="adminPass" placeholder="Enter staff passcode..." class="w-full border rounded px-3 py-2 mb-4 text-sm">
-        <div class="flex justify-end space-x-2">
-          <button onclick="toggleAdminModal()" class="px-4 py-2 text-sm text-gray-600">Cancel</button>
-          <button onclick="checkAdminPass()" class="bg-[#1B365D] text-white px-4 py-2 rounded text-sm">Log In</button>
-        </div>
-      </div>
-      <div id="adminControls" class="hidden">
-        <p class="text-sm font-semibold text-green-700 mb-2">✓ Authenticated as Staff Administrator</p>
-        <p class="text-xs text-gray-600 mb-4">To add files, drop PDF files into <code>/pdfs/</code> on GitHub and update <code>mtr-list.json</code>.</p>
-        <button onclick="toggleAdminModal()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded text-sm font-semibold">Close Panel</button>
-      </div>
-    </div>
-  </div>
+  <!-- Footer -->
+  <footer class="bg-gray-800 text-gray-400 py-6 text-center text-xs no-print">
+    <p>&copy; 2026 Titan Flow Products Inc. All rights reserved.</p>
+    <p class="mt-1">Certified Mill Test Report Database Management System</p>
+  </footer>
 
   <script>
-    async function performSearch() {
+    async function searchMTR() {
       const input = document.getElementById('searchInput').value.trim().toUpperCase();
-      const resBox = document.getElementById('resultsContainer');
-      const selBox = document.getElementById('selectionContainer');
       const noResBox = document.getElementById('noResults');
+      const certArea = document.getElementById('printable-area');
+      const printBar = document.getElementById('printActionBar');
 
-      resBox.classList.add('hidden');
-      selBox.classList.add('hidden');
       noResBox.classList.add('hidden');
+      certArea.classList.add('hidden');
+      printBar.classList.add('hidden');
 
       if (!input) return;
 
       try {
-        const response = await fetch('mtr-list.json');
-        let fileList = response.ok ? await response.json() : [];
+        const response = await fetch('mtr-database.json');
+        const db = response.ok ? await response.json() : [];
+        const record = db.find(item => item.heat && item.heat.toUpperCase() === input);
 
-        const matches = fileList.filter(filename => {
-          const cleanName = filename.toUpperCase();
-          return cleanName.includes(input);
-        });
-
-        if (matches.length === 0) {
+        if (!record) {
           noResBox.classList.remove('hidden');
           return;
         }
 
-        if (matches.length === 1) {
-          loadPdfDirect(matches[0], matches[0]);
-        } else {
-          document.getElementById('selHeatNum').innerText = input;
-          let listHtml = '';
-          matches.forEach(filename => {
-            const cleanLabel = filename.replace(/\.[^/.]+$/, "");
-            listHtml += `<button onclick="loadPdfDirect('${filename.replace(/'/g, "\\'")}', '${cleanLabel.replace(/'/g, "\\'")}')" class="w-full text-left bg-white hover:bg-blue-100 border border-blue-200 p-2.5 rounded text-xs font-semibold text-blue-900 transition flex justify-between items-center">
-              <span>${cleanLabel}</span>
-              <span class="text-gray-500 font-mono text-[10px]">Select PDF →</span>
-            </button>`;
-          });
-          document.getElementById('itemList').innerHTML = listHtml;
-          selBox.classList.remove('hidden');
-        }
+        // Populate certificate fields
+        document.getElementById('lblHeat').innerText = record.heat || 'N/A';
+        document.getElementById('lblDescription').innerText = record.description || 'N/A';
+        document.getElementById('customerDescInput').value = record.description || '';
+        document.getElementById('lblSpecs').innerText = record.specs || 'N/A';
+        document.getElementById('lblHeatTreatment').innerText = record.heatTreatment || 'N/A';
+        document.getElementById('lblDimension').innerText = (record.dimension || '') + ' ' + (record.threads || '');
+        document.getElementById('lblComments').innerText = record.comments || '';
+
+        // Chemistry
+        const c = record.chem || {};
+        document.getElementById('chemC').innerText = c.c || '-';
+        document.getElementById('chemMn').innerText = c.mn || '-';
+        document.getElementById('chemP').innerText = c.p || '-';
+        document.getElementById('chemS').innerText = c.s || '-';
+        document.getElementById('chemSi').innerText = c.si || '-';
+        document.getElementById('chemCr').innerText = c.cr || '-';
+        document.getElementById('chemNi').innerText = c.ni || '-';
+        document.getElementById('chemMo').innerText = c.mo || '-';
+        document.getElementById('chemCu').innerText = c.cu || '-';
+        document.getElementById('chemV').innerText = c.v || '-';
+        document.getElementById('chemAl').innerText = c.al || '-';
+        document.getElementById('chemTi').innerText = c.ti || '-';
+        document.getElementById('chemB').innerText = c.b || '-';
+        document.getElementById('chemNb').innerText = c.nb || '-';
+        document.getElementById('chemCe').innerText = c.ce || '-';
+
+        // Mechanicals
+        const m = record.mech || {};
+        document.getElementById('mechTensile').innerText = m.tensile || '-';
+        document.getElementById('mechYield').innerText = m.yield || '-';
+        document.getElementById('mechElong').innerText = m.elong || '-';
+        document.getElementById('mechRa').innerText = m.ra || '-';
+        document.getElementById('mechHardness').innerText = m.hardness || '-';
+
+        certArea.classList.remove('hidden');
+        printBar.classList.remove('hidden');
+        certArea.scrollIntoView({ behavior: 'smooth' });
+
       } catch (e) {
-        noResBox.classList.add('hidden');
+        console.error("Error searching database:", e);
+        noResBox.classList.remove('hidden');
       }
     }
 
-    function loadPdfDirect(filename, label) {
-      document.getElementById('selectionContainer').classList.add('hidden');
-      document.getElementById('noResults').classList.add('hidden');
-      document.getElementById('displayProductDesc').innerText = label;
-      
-      const pdfUrl = `pdfs/${encodeURIComponent(filename)}`;
-      document.getElementById('pdfViewerIframe').src = pdfUrl;
-      document.getElementById('openFullPdfBtn.href') // fixed below
-      document.getElementById('openFullPdfBtn').href = pdfUrl;
-
-      document.getElementById('customDescInput').value = '';
-      document.getElementById('customDescDisplayBox').classList.add('hidden');
-      document.getElementById('resultsContainer').classList.remove('hidden');
-    }
-
-    function updateCustomDesc() {
-      const val = document.getElementById('customDescInput').value.trim();
-      const displayBox = document.getElementById('customDescDisplayBox');
-      const resCustom = document.getElementById('resCustomDesc');
-
-      if (val) {
-        resCustom.innerText = val;
-        displayBox.classList.remove('hidden');
-      } else {
-        displayBox.classList.add('hidden');
-      }
-    }
-
-    function toggleAdminModal() {
-      document.getElementById('adminModal').classList.toggle('hidden');
-    }
-
-    function checkAdminPass() {
-      if (document.getElementById('adminPass').value === 'Nipples8524!') {
-        document.getElementById('adminAuth').classList.add('hidden');
-        document.getElementById('adminControls').classList.remove('hidden');
-      } else {
-        alert('Incorrect Passcode');
-      }
-    }
+    // Live sync customer custom description input to the printable view
+    document.getElementById('customerDescInput').addEventListener('input', function() {
+      document.getElementById('lblDescription').innerText = this.value;
+    });
   </script>
 </body>
 </html>
