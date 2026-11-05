@@ -1,68 +1,33 @@
-[
-  {
-    "heat": "T660338",
-    "description": "3 S160 A106B BLK SMLS PIPE NPL",
-    "specs": "ASTM/ASME-2023, A106B, CSA Z245.1-22, Gr.359 CAT II, SS, NACE MR0175/103, MSS-SP25, SP-95.",
-    "heatTreatment": "Normalizing at 920°, air cooling",
-    "dimension": "ASME B16.11 / ANSI B1.20.1",
-    "threads": "",
-    "chem": {
-      "c": "0.115",
-      "mn": "1.26",
-      "p": "0.007",
-      "s": "0.003",
-      "si": "0.317",
-      "cr": "0.18",
-      "ni": "0.22",
-      "mo": "0.08",
-      "cu": "0.14",
-      "v": "0.07",
-      "al": "-",
-      "ti": "<0.001",
-      "b": "0.0004",
-      "nb": "0.01",
-      "ce": "0.35"
-    },
-    "mech": {
-      "tensile": "78320 PSI",
-      "yield": "57290 PSI",
-      "elong": "42",
-      "ra": "-",
-      "hardness": "-"
-    },
-    "comments": "Steel making process: Electric Furnace. We certify the above mentioned fittings have been manufactured and tested in accordance with stated specifications indicated above."
+{
+  "heat": "",
+  "description": "",
+  "specs": "ASTM/ASME-2023, A106B, CSA Z245.1-22, Gr.359 CAT II, SS, NACE MR0175/103, MSS-SP25, SP-95.",
+  "heatTreatment": "Normalizing at 920°, air cooling",
+  "dimension": "ASME B16.11 / ANSI B1.20.1",
+  "threads": "",
+  "chem": {
+    "c": "0.115",
+    "mn": "1.26",
+    "p": "0.007",
+    "s": "0.003",
+    "si": "0.317",
+    "cr": "0.18",
+    "ni": "0.22",
+    "mo": "0.08",
+    "cu": "0.14",
+    "v": "0.07",
+    "al": "-",
+    "ti": "<0.001",
+    "b": "0.0004",
+    "nb": "0.01",
+    "ce": "0.35"
   },
-  {
-    "heat": "T642576",
-    "description": "1/2\" S80 A333 GR6 BLK SMLS NPL",
-    "specs": "ASTM/ASME-21 A333 Grade 6, CSA Z245.1-18 GR.359 CAT II, SS, NACE MR0175/103, MSS-SP25, SP-95.",
-    "heatTreatment": "Normalizing at 900°, air cooling",
-    "dimension": "ASME B16.11 / ANSI B1.20.1",
-    "threads": "",
-    "chem": {
-      "c": "0.12",
-      "mn": "1.24",
-      "p": "0.01",
-      "s": "0.002",
-      "si": "0.31",
-      "cr": "0.16",
-      "ni": "0.22",
-      "mo": "0.05",
-      "cu": "0.16",
-      "v": "0.065",
-      "al": "-",
-      "ti": "0.002",
-      "b": "0.0004",
-      "nb": "0.013",
-      "ce": "0.407"
-    },
-    "mech": {
-      "tensile": "78756 PSI",
-      "yield": "58160 PSI",
-      "elong": "42",
-      "ra": "-",
-      "hardness": "157 HB"
-    },
-    "comments": "Steel making process: Electric Furnace. We certify the above mentioned fittings have been manufactured and tested in accordance with stated specifications indicated above."
-  }
-]
+  "mech": {
+    "tensile": "78320 PSI",
+    "yield": "57290 PSI",
+    "elong": "42",
+    "ra": "-",
+    "hardness": "-"
+  },
+  "comments": "Steel making process: Electric Furnace. We certify the above mentioned fittings have been manufactured and tested in accordance with stated specifications indicated above."
+}
