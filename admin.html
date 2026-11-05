@@ -398,53 +398,59 @@
     }
 
     function generateDatabaseJSON() {
-      const record = {
-        "heat": document.getElementById('manualHeat').value.trim(),
-        "description": document.getElementById('manualDesc').value.trim(),
-        "specs": document.getElementById('manualSpecs').value.trim(),
-        "heatTreatment": document.getElementById('manualHeatTreat').value.trim(),
-        "dimension": document.getElementById('manualDim').value.trim(),
-        "threads": "",
-        "chem": {
-          "c": document.getElementById('mC').value.trim(),
-          "mn": document.getElementById('mMn').value.trim(),
-          "p": document.getElementById('mP').value.trim(),
-          "s": document.getElementById('mS').value.trim(),
-          "si": document.getElementById('mSi').value.trim(),
-          "cr": document.getElementById('mCr').value.trim(),
-          "ni": document.getElementById('mNi').value.trim(),
-          "mo": document.getElementById('mMo').value.trim(),
-          "cu": document.getElementById('mCu').value.trim(),
-          "v": document.getElementById('mV').value.trim(),
-          "al": document.getElementById('mAl').value.trim(),
-          "ti": document.getElementById('mTi').value.trim(),
-          "b": document.getElementById('mB').value.trim(),
-          "nb": document.getElementById('mNb').value.trim(),
-          "ce": document.getElementById('mCe').value.trim()
-        },
-        "mech": {
-          "tensile": document.getElementById('mTensile').value.trim(),
-          "yield": document.getElementById('mYield').value.trim(),
-          "elong": document.getElementById('mElong').value.trim(),
-          "ra": document.getElementById('mRa').value.trim(),
-          "hardness": document.getElementById('mHardness').value.trim()
-        },
-        "comments": document.getElementById('mComments').value.trim()
-      };
+  const heatVal = document.getElementById('manualHeat').value.trim().toUpperCase();
+  if (!heatVal) {
+    alert("Please enter a Heat Code before generating JSON.");
+    return;
+  }
 
-      const jsonString = JSON.stringify(record, null, 2);
-      document.getElementById('jsonOutputText').value = jsonString;
-      const box = document.getElementById('jsonOutputContainer');
-      box.classList.remove('hidden');
-      box.scrollIntoView({ behavior: 'smooth' });
-    }
+  const record = {
+    "heat": heatVal,
+    "description": document.getElementById('manualDesc').value.trim(),
+    "specs": document.getElementById('manualSpecs').value.trim(),
+    "heatTreatment": document.getElementById('manualHeatTreat').value.trim(),
+    "dimension": document.getElementById('manualDim').value.trim(),
+    "threads": "",
+    "chem": {
+      "c": document.getElementById('mC').value.trim(),
+      "mn": document.getElementById('mMn').value.trim(),
+      "p": document.getElementById('mP').value.trim(),
+      "s": document.getElementById('mS').value.trim(),
+      "si": document.getElementById('mSi').value.trim(),
+      "cr": document.getElementById('mCr').value.trim(),
+      "ni": document.getElementById('mNi').value.trim(),
+      "mo": document.getElementById('mMMo') ? document.getElementById('mMMo').value.trim() : "",
+      "cu": document.getElementById('mCu') ? document.getElementById('mCu').value.trim() : "",
+      "v": document.getElementById('mV') ? document.getElementById('mV').value.trim() : "",
+      "al": document.getElementById('mAl') ? document.getElementById('mAl').value.trim() : "",
+      "ti": document.getElementById('mTi') ? document.getElementById('mTi').value.trim() : "",
+      "b": document.getElementById('mB') ? document.getElementById('mB').value.trim() : "",
+      "nb": document.getElementById('mNb') ? document.getElementById('mNb').value.trim() : "",
+      "ce": document.getElementById('mCe') ? document.getElementById('mCe').value.trim() : ""
+    },
+    "mech": {
+      "tensile": document.getElementById('mTen') ? document.getElementById('mTen').value.trim() : "",
+      "yield": document.getElementById('mYld') ? document.getElementById('mYld').value.trim() : "",
+      "elong": document.getElementById('mElg') ? document.getElementById('mElg').value.trim() : "",
+      "ra": document.getElementById('mRa') ? document.getElementById('mRa').value.trim() : "",
+      "hardness": document.getElementById('mHrd') ? document.getElementById('mHrd').value.trim() : ""
+    },
+    "comments": document.getElementById('manualComments') ? document.getElementById('manualComments').value.trim() : ""
+  };
 
-    function copyJSONCode() {
-      const copyText = document.getElementById('jsonOutputText');
-      copyText.select();
-      document.execCommand('copy');
-      alert('✓ JSON Code copied to clipboard! Paste it into your mtr-database.json file on GitHub.');
-    }
-  </script>
-</body>
-</html>
+  const jsonText = JSON.stringify(record, null, 2);
+
+  // Show in code modal on screen
+  const outputElem = document.getElementById('jsonOutput') || document.getElementById('dbJsonOutput');
+  if (outputElem) outputElem.innerText = jsonText;
+  
+  const modalElem = document.getElementById('jsonModal') || document.getElementById('dbJsonModal');
+  if (modalElem) modalElem.classList.remove('hidden');
+
+  // Trigger automatic download of local backup .json file
+  const blob = new Blob([jsonText], { type: 'application/json' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `MTR_Backup_${heatVal}.json`;
+  link.click();
+}
