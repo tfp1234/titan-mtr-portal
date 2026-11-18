@@ -55,15 +55,26 @@
       <p class="text-xs text-gray-600 mb-4">Enter the <strong>Heat Code</strong> stamped on your fitting or component to pull up the certified Mill Test Report.</p>
       
       <div class="flex flex-col sm:flex-row gap-3">
-        <input type="text" id="searchInput" placeholder="Enter Heat # (e.g. T642576)..." class="flex-grow border border-gray-300 rounded px-4 py-2.5 text-sm uppercase font-mono font-bold text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-600" onkeydown="if(event.key === 'Enter') searchMTR()">
+        <input type="text" id="searchInput" placeholder="Enter Heat # (e.g. T642576 or 032A)..." class="flex-grow border border-gray-300 rounded px-4 py-2.5 text-sm uppercase font-mono font-bold text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-600" onkeydown="if(event.key === 'Enter') searchMTR()">
         <button onclick="searchMTR()" class="bg-[#1B365D] hover:bg-blue-900 text-white font-semibold px-8 py-2.5 rounded text-sm shadow transition">Search MTR</button>
       </div>
     </div>
 
     <!-- Error / Not Found Box -->
     <div id="noResults" class="hidden bg-amber-50 border border-amber-300 text-amber-900 rounded-lg p-6 text-center mb-6 no-print shadow-sm">
-      <h3 class="font-bold text-sm mb-1">No MTR PDF found for that Heat Code.</h3>
+      <h3 class="font-bold text-sm mb-1">No MTR found for that Heat Code.</h3>
       <p class="text-xs text-amber-800">Please verify the heat number stamped on your component or contact Titan Flow Products at <strong>(587) 410-8373</strong>.</p>
+    </div>
+
+    <!-- Pre-Created PDF Matches Box (Hidden initially) -->
+    <div id="pdfResultsArea" class="hidden bg-white rounded-lg shadow-md p-6 mb-8 no-print border-l-4 border-green-600">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <h3 class="font-bold text-green-900 text-sm">✓ Original Certified PDF Document(s) Found</h3>
+          <p class="text-xs text-gray-600">Click any document below to view, print, or save as PDF:</p>
+        </div>
+      </div>
+      <div id="pdfLinksList" class="space-y-2"></div>
     </div>
 
     <!-- Printable Certificate View (Hidden initially) -->
@@ -253,85 +264,147 @@
   </footer>
 
   <script>
+    // GitHub repo configuration for automatic PDF folder scanning
+    const GITHUB_OWNER = 'tfp1234';
+    const GITHUB_REPO = 'titan-mtr-portal';
+    const PDF_FOLDER = 'pdfs';
+
     async function searchMTR() {
       const input = document.getElementById('searchInput').value.trim().toUpperCase();
       const noResBox = document.getElementById('noResults');
+      const pdfArea = document.getElementById('pdfResultsArea');
+      const pdfLinksList = document.getElementById('pdfLinksList');
       const certArea = document.getElementById('printable-area');
       const printBar = document.getElementById('printActionBar');
 
       noResBox.classList.add('hidden');
+      pdfArea.classList.add('hidden');
+      pdfLinksList.innerHTML = '';
       certArea.classList.add('hidden');
       printBar.classList.add('hidden');
 
       if (!input) return;
 
+      let foundJsonRecord = false;
+      let foundPdfFiles = false;
+
+      // 1. Scan GitHub 'pdfs/' folder for files starting with "<HEAT#> " or exact "<HEAT#>.pdf"
+      try {
+        const ghRes = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${PDF_FOLDER}`);
+        if (ghRes.ok) {
+          const files = await ghRes.json();
+          if (Array.isArray(files)) {
+            const matchingPdfs = files.filter(file => {
+              if (file.type !== 'file') return false;
+              const upperName = file.name.toUpperCase();
+              if (!upperName.endsWith('.PDF')) return false;
+              // Match "<HEAT#> <description>.pdf" or "<HEAT#>.pdf"
+              return upperName.startsWith(input + ' ') || upperName === input + '.PDF';
+            });
+
+            if (matchingPdfs.length > 0) {
+              foundPdfFiles = true;
+              matchingPdfs.forEach(pdf => {
+                const encodedPath = `${PDF_FOLDER}/${encodeURIComponent(pdf.name)}`;
+                const row = document.createElement('div');
+                row.className = 'flex flex-col sm:flex-row sm:items-center justify-between bg-gray-50 border border-gray-200 rounded p-3 gap-2';
+                row.innerHTML = `
+                  <div class="flex items-center space-x-2">
+                    <span class="text-red-600 font-bold text-xs uppercase bg-red-50 border border-red-200 px-2 py-0.5 rounded">PDF</span>
+                    <span class="font-mono font-bold text-xs text-gray-900">${pdf.name}</span>
+                  </div>
+                  <div class="flex items-center space-x-2">
+                    <a href="${encodedPath}" target="_blank" rel="noopener" class="bg-[#1B365D] hover:bg-blue-900 text-white font-bold px-4 py-1.5 rounded text-xs shadow transition">
+                      View / Print PDF
+                    </a>
+                    <a href="${encodedPath}" download="${pdf.name}" class="bg-green-700 hover:bg-green-800 text-white font-bold px-4 py-1.5 rounded text-xs shadow transition">
+                      Save PDF
+                    </a>
+                  </div>
+                `;
+                pdfLinksList.appendChild(row);
+              });
+              pdfArea.classList.remove('hidden');
+            }
+          }
+        }
+      } catch (pdfErr) {
+        console.warn("PDF folder scan skipped or unavailable:", pdfErr);
+      }
+
+      // 2. Search mtr-database.json for generated MTR records
       try {
         const response = await fetch('mtr-database.json?v=' + Date.now());
         const db = response.ok ? await response.json() : [];
         const record = db.find(item => item.heat && item.heat.toUpperCase() === input);
 
-        if (!record) {
-          noResBox.classList.remove('hidden');
-          return;
+        if (record) {
+          foundJsonRecord = true;
+
+          // Populate certificate fields
+          if (record.certNo) document.getElementById('lblCertNo').innerText = record.certNo;
+          document.getElementById('lblHeat').innerText = record.heat || 'N/A';
+          document.getElementById('lblDescription').innerText = record.description || 'N/A';
+          document.getElementById('customerDescInput').value = record.description || '';
+          document.getElementById('lblSpecs').innerText = record.specs || 'N/A';
+          document.getElementById('lblHeatTreatment').innerText = record.heatTreatment || 'N/A';
+          document.getElementById('lblDimension').innerText = (record.dimension || '') + ' ' + (record.threads || '');
+          document.getElementById('lblComments').innerText = record.comments || '';
+
+          // Chemistry
+          const c = record.chem || {};
+          document.getElementById('chemC').innerText = c.c || '-';
+          document.getElementById('chemMn').innerText = c.mn || '-';
+          document.getElementById('chemP').innerText = c.p || '-';
+          document.getElementById('chemS').innerText = c.s || '-';
+          document.getElementById('chemSi').innerText = c.si || '-';
+          document.getElementById('chemCr').innerText = c.cr || '-';
+          document.getElementById('chemNi').innerText = c.ni || '-';
+          document.getElementById('chemMo').innerText = c.mo || '-';
+          document.getElementById('chemCu').innerText = c.cu || '-';
+          document.getElementById('chemV').innerText = c.v || '-';
+          document.getElementById('chemAl').innerText = c.al || '-';
+          document.getElementById('chemTi').innerText = c.ti || '-';
+          document.getElementById('chemB').innerText = c.b || '-';
+          document.getElementById('chemNb').innerText = c.nb || '-';
+          document.getElementById('chemCe').innerText = c.ce || '-';
+
+          // Mechanicals
+          const m = record.mech || {};
+          document.getElementById('mechTensile').innerText = m.tensile || '-';
+          document.getElementById('mechYield').innerText = m.yield || '-';
+          document.getElementById('mechElong').innerText = m.elong || '-';
+          document.getElementById('mechRa').innerText = m.ra || '-';
+          document.getElementById('mechHardness').innerText = m.hardness || '-';
+
+          // Impact Results (Show only if present)
+          const imp = record.impact || {};
+          const impactSection = document.getElementById('certImpactSection');
+          if (imp.size || imp.temp || imp.energy || imp.lateral || imp.shear) {
+            impactSection.classList.remove('hidden');
+            document.getElementById('certImpSize').innerText = imp.size || '-';
+            document.getElementById('certImpTemp').innerText = imp.temp || '-';
+            document.getElementById('certImpEnergy').innerText = imp.energy || '-';
+            document.getElementById('certImpLat').innerText = imp.lateral || '-';
+            document.getElementById('certImpShear').innerText = imp.shear || '-';
+          } else {
+            impactSection.classList.add('hidden');
+          }
+
+          certArea.classList.remove('hidden');
+          printBar.classList.remove('hidden');
         }
-
-        // Populate certificate fields
-        if (record.certNo) document.getElementById('lblCertNo').innerText = record.certNo;
-        document.getElementById('lblHeat').innerText = record.heat || 'N/A';
-        document.getElementById('lblDescription').innerText = record.description || 'N/A';
-        document.getElementById('customerDescInput').value = record.description || '';
-        document.getElementById('lblSpecs').innerText = record.specs || 'N/A';
-        document.getElementById('lblHeatTreatment').innerText = record.heatTreatment || 'N/A';
-        document.getElementById('lblDimension').innerText = (record.dimension || '') + ' ' + (record.threads || '');
-        document.getElementById('lblComments').innerText = record.comments || '';
-
-        // Chemistry
-        const c = record.chem || {};
-        document.getElementById('chemC').innerText = c.c || '-';
-        document.getElementById('chemMn').innerText = c.mn || '-';
-        document.getElementById('chemP').innerText = c.p || '-';
-        document.getElementById('chemS').innerText = c.s || '-';
-        document.getElementById('chemSi').innerText = c.si || '-';
-        document.getElementById('chemCr').innerText = c.cr || '-';
-        document.getElementById('chemNi').innerText = c.ni || '-';
-        document.getElementById('chemMo').innerText = c.mo || '-';
-        document.getElementById('chemCu').innerText = c.cu || '-';
-        document.getElementById('chemV').innerText = c.v || '-';
-        document.getElementById('chemAl').innerText = c.al || '-';
-        document.getElementById('chemTi').innerText = c.ti || '-';
-        document.getElementById('chemB').innerText = c.b || '-';
-        document.getElementById('chemNb').innerText = c.nb || '-';
-        document.getElementById('chemCe').innerText = c.ce || '-';
-
-        // Mechanicals
-        const m = record.mech || {};
-        document.getElementById('mechTensile').innerText = m.tensile || '-';
-        document.getElementById('mechYield').innerText = m.yield || '-';
-        document.getElementById('mechElong').innerText = m.elong || '-';
-        document.getElementById('mechRa').innerText = m.ra || '-';
-        document.getElementById('mechHardness').innerText = m.hardness || '-';
-
-        // Impact Results (Show only if present)
-        const imp = record.impact || {};
-        const impactSection = document.getElementById('certImpactSection');
-        if (imp.size || imp.temp || imp.energy || imp.lateral || imp.shear) {
-          impactSection.classList.remove('hidden');
-          document.getElementById('certImpSize').innerText = imp.size || '-';
-          document.getElementById('certImpTemp').innerText = imp.temp || '-';
-          document.getElementById('certImpEnergy').innerText = imp.energy || '-';
-          document.getElementById('certImpLat').innerText = imp.lateral || '-';
-          document.getElementById('certImpShear').innerText = imp.shear || '-';
-        } else {
-          impactSection.classList.add('hidden');
-        }
-
-        certArea.classList.remove('hidden');
-        printBar.classList.remove('hidden');
-        certArea.scrollIntoView({ behavior: 'smooth' });
-
       } catch (e) {
-        console.error("Error searching database:", e);
+        console.error("Error searching JSON database:", e);
+      }
+
+      // 3. Show "Not Found" only if neither PDF nor JSON record matched
+      if (!foundPdfFiles && !foundJsonRecord) {
         noResBox.classList.remove('hidden');
+      } else if (foundPdfFiles) {
+        pdfArea.scrollIntoView({ behavior: 'smooth' });
+      } else if (foundJsonRecord) {
+        certArea.scrollIntoView({ behavior: 'smooth' });
       }
     }
 
