@@ -288,19 +288,28 @@
       let foundJsonRecord = false;
       let foundPdfFiles = false;
 
-      // 1. Scan GitHub 'pdfs/' folder for files starting with "<HEAT#> " or exact "<HEAT#>.pdf"
+      // 1. Scan repository tree for all files under 'pdfs/' (avoids the 1,000-file /contents truncation)
+      let matchingPdfs = [];
       try {
-        const ghRes = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${PDF_FOLDER}`);
-        if (ghRes.ok) {
-          const files = await ghRes.json();
-          if (Array.isArray(files)) {
-            const matchingPdfs = files.filter(file => {
-              if (file.type !== 'file') return false;
-              const upperName = file.name.toUpperCase();
+        const treeRes = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/git/trees/main?recursive=1`);
+        if (treeRes.ok) {
+          const treeData = await treeRes.json();
+          const entries = Array.isArray(treeData.tree) ? treeData.tree : [];
+
+          matchingPdfs = entries
+            .filter(entry => {
+              if (entry.type !== 'blob' || !entry.path.startsWith(`${PDF_FOLDER}/`)) return false;
+              const fileName = entry.path.slice(`${PDF_FOLDER}/`.length);
+              if (fileName.includes('/')) return false;
+              const upperName = fileName.toUpperCase();
               if (!upperName.endsWith('.PDF')) return false;
-              // Match "<HEAT#> <description>.pdf" or "<HEAT#>.pdf"
               return upperName.startsWith(input + ' ') || upperName === input + '.PDF';
-            });
+            })
+            .map(entry => ({ name: entry.path.slice(`${PDF_FOLDER}/`.length) }));
+        }
+      } catch (pdfErr) {
+        console.warn("PDF tree scan skipped or unavailable:", pdfErr);
+      }
 
             if (matchingPdfs.length > 0) {
               foundPdfFiles = true;
