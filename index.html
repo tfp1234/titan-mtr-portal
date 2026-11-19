@@ -9,14 +9,14 @@
     @media print {
       body * { visibility: hidden !important; }
       #printable-area, #printable-area * { visibility: visible !important; }
-      #printable-area { 
-        position: absolute !important; 
-        left: 0 !important; 
-        top: 0 !important; 
-        width: 100% !important; 
-        margin: 0 !important; 
-        padding: 10px !important; 
-        background: white !important; 
+      #printable-area {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 10px !important;
+        background: white !important;
       }
       .no-print { display: none !important; }
       @page { size: auto; margin: 10mm; }
@@ -48,12 +48,12 @@
 
   <!-- Main Content -->
   <main class="max-w-4xl mx-auto w-full px-4 py-8 flex-grow">
-    
+
     <!-- Search Box Card -->
     <div class="bg-white rounded-lg shadow-md p-6 mb-8 no-print border-t-4 border-[#1B365D]">
       <h2 class="text-lg font-bold text-[#1B365D] mb-1">Search Material Test Reports</h2>
       <p class="text-xs text-gray-600 mb-4">Enter the <strong>Heat Code</strong> stamped on your fitting or component to pull up the certified Mill Test Report.</p>
-      
+
       <div class="flex flex-col sm:flex-row gap-3">
         <input type="text" id="searchInput" placeholder="Enter Heat # (e.g. T642576 or 032A)..." class="flex-grow border border-gray-300 rounded px-4 py-2.5 text-sm uppercase font-mono font-bold text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-600" onkeydown="if(event.key === 'Enter') searchMTR()">
         <button onclick="searchMTR()" class="bg-[#1B365D] hover:bg-blue-900 text-white font-semibold px-8 py-2.5 rounded text-sm shadow transition">Search MTR</button>
@@ -79,7 +79,7 @@
 
     <!-- Printable Certificate View (Hidden initially) -->
     <div id="printable-area" class="hidden bg-white p-8 rounded-lg shadow border border-gray-300 text-xs mb-8">
-      
+
       <!-- Company Header -->
       <div class="flex justify-between items-start border-b-2 border-[#1B365D] pb-4 mb-4">
         <div>
@@ -153,7 +153,7 @@
             </tr>
           </tbody>
         </table>
-        
+
         <table class="w-full border-collapse border border-gray-400 text-center mt-2">
           <thead>
             <tr class="bg-gray-100 text-[10px]">
@@ -264,10 +264,44 @@
   </footer>
 
   <script>
-    // GitHub repo configuration for automatic PDF folder scanning
     const GITHUB_OWNER = 'tfp1234';
     const GITHUB_REPO = 'titan-mtr-portal';
     const PDF_FOLDER = 'pdfs';
+    const TREE_CACHE_KEY = 'titan_pdfs_tree_cache_v1';
+
+    async function getPdfFileNamesFromRepo() {
+      try {
+        const cached = sessionStorage.getItem(TREE_CACHE_KEY);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed)) return parsed;
+        }
+      } catch (e) {
+        // Ignore storage errors
+      }
+
+      const treeRes = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/git/trees/main?recursive=1`);
+      if (!treeRes.ok) {
+        throw new Error(`GitHub API returned ${treeRes.status}`);
+      }
+
+      const treeData = await treeRes.json();
+      const entries = Array.isArray(treeData.tree) ? treeData.tree : [];
+      const prefix = `${PDF_FOLDER}/`;
+
+      const fileNames = entries
+        .filter(entry => entry.type === 'blob' && typeof entry.path === 'string' && entry.path.startsWith(prefix))
+        .map(entry => entry.path.slice(prefix.length))
+        .filter(name => name && !name.includes('/') && name.toUpperCase().endsWith('.PDF'));
+
+      try {
+        sessionStorage.setItem(TREE_CACHE_KEY, JSON.stringify(fileNames));
+      } catch (e) {
+        // Ignore storage quota errors
+      }
+
+      return fileNames;
+    }
 
     async function searchMTR() {
       const input = document.getElementById('searchInput').value.trim().toUpperCase();
@@ -288,57 +322,40 @@
       let foundJsonRecord = false;
       let foundPdfFiles = false;
 
-      // 1. Scan repository tree for all files under 'pdfs/' (avoids the 1,000-file /contents truncation)
-      let matchingPdfs = [];
+      // 1. Scan repository tree for all files under 'pdfs/'
       try {
-        const treeRes = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/git/trees/main?recursive=1`);
-        if (treeRes.ok) {
-          const treeData = await treeRes.json();
-          const entries = Array.isArray(treeData.tree) ? treeData.tree : [];
+        const allPdfNames = await getPdfFileNamesFromRepo();
+        const matchingPdfs = allPdfNames.filter(fileName => {
+          const upperName = fileName.toUpperCase();
+          return upperName.startsWith(input + ' ') || upperName === input + '.PDF';
+        });
 
-          matchingPdfs = entries
-            .filter(entry => {
-              if (entry.type !== 'blob' || !entry.path.startsWith(`${PDF_FOLDER}/`)) return false;
-              const fileName = entry.path.slice(`${PDF_FOLDER}/`.length);
-              if (fileName.includes('/')) return false;
-              const upperName = fileName.toUpperCase();
-              if (!upperName.endsWith('.PDF')) return false;
-              return upperName.startsWith(input + ' ') || upperName === input + '.PDF';
-            })
-            .map(entry => ({ name: entry.path.slice(`${PDF_FOLDER}/`.length) }));
+        if (matchingPdfs.length > 0) {
+          foundPdfFiles = true;
+          matchingPdfs.forEach(fileName => {
+            const encodedPath = `${PDF_FOLDER}/${encodeURIComponent(fileName)}`;
+            const row = document.createElement('div');
+            row.className = 'flex flex-col sm:flex-row sm:items-center justify-between bg-gray-50 border border-gray-200 rounded p-3 gap-2';
+            row.innerHTML = `
+              <div class="flex items-center space-x-2">
+                <span class="text-red-600 font-bold text-xs uppercase bg-red-50 border border-red-200 px-2 py-0.5 rounded">PDF</span>
+                <span class="font-mono font-bold text-xs text-gray-900">${fileName}</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <a href="${encodedPath}" target="_blank" rel="noopener" class="bg-[#1B365D] hover:bg-blue-900 text-white font-bold px-4 py-1.5 rounded text-xs shadow transition">
+                  View / Print PDF
+                </a>
+                <a href="${encodedPath}" download="${fileName}" class="bg-green-700 hover:bg-green-800 text-white font-bold px-4 py-1.5 rounded text-xs shadow transition">
+                  Save PDF
+                </a>
+              </div>
+            `;
+            pdfLinksList.appendChild(row);
+          });
+          pdfArea.classList.remove('hidden');
         }
       } catch (pdfErr) {
         console.warn("PDF tree scan skipped or unavailable:", pdfErr);
-      }
-
-            if (matchingPdfs.length > 0) {
-              foundPdfFiles = true;
-              matchingPdfs.forEach(pdf => {
-                const encodedPath = `${PDF_FOLDER}/${encodeURIComponent(pdf.name)}`;
-                const row = document.createElement('div');
-                row.className = 'flex flex-col sm:flex-row sm:items-center justify-between bg-gray-50 border border-gray-200 rounded p-3 gap-2';
-                row.innerHTML = `
-                  <div class="flex items-center space-x-2">
-                    <span class="text-red-600 font-bold text-xs uppercase bg-red-50 border border-red-200 px-2 py-0.5 rounded">PDF</span>
-                    <span class="font-mono font-bold text-xs text-gray-900">${pdf.name}</span>
-                  </div>
-                  <div class="flex items-center space-x-2">
-                    <a href="${encodedPath}" target="_blank" rel="noopener" class="bg-[#1B365D] hover:bg-blue-900 text-white font-bold px-4 py-1.5 rounded text-xs shadow transition">
-                      View / Print PDF
-                    </a>
-                    <a href="${encodedPath}" download="${pdf.name}" class="bg-green-700 hover:bg-green-800 text-white font-bold px-4 py-1.5 rounded text-xs shadow transition">
-                      Save PDF
-                    </a>
-                  </div>
-                `;
-                pdfLinksList.appendChild(row);
-              });
-              pdfArea.classList.remove('hidden');
-            }
-          }
-        }
-      } catch (pdfErr) {
-        console.warn("PDF folder scan skipped or unavailable:", pdfErr);
       }
 
       // 2. Search mtr-database.json for generated MTR records
@@ -350,7 +367,6 @@
         if (record) {
           foundJsonRecord = true;
 
-          // Populate certificate fields
           if (record.certNo) document.getElementById('lblCertNo').innerText = record.certNo;
           document.getElementById('lblHeat').innerText = record.heat || 'N/A';
           document.getElementById('lblDescription').innerText = record.description || 'N/A';
@@ -360,7 +376,6 @@
           document.getElementById('lblDimension').innerText = (record.dimension || '') + ' ' + (record.threads || '');
           document.getElementById('lblComments').innerText = record.comments || '';
 
-          // Chemistry
           const c = record.chem || {};
           document.getElementById('chemC').innerText = c.c || '-';
           document.getElementById('chemMn').innerText = c.mn || '-';
@@ -378,7 +393,6 @@
           document.getElementById('chemNb').innerText = c.nb || '-';
           document.getElementById('chemCe').innerText = c.ce || '-';
 
-          // Mechanicals
           const m = record.mech || {};
           document.getElementById('mechTensile').innerText = m.tensile || '-';
           document.getElementById('mechYield').innerText = m.yield || '-';
@@ -386,7 +400,6 @@
           document.getElementById('mechRa').innerText = m.ra || '-';
           document.getElementById('mechHardness').innerText = m.hardness || '-';
 
-          // Impact Results (Show only if present)
           const imp = record.impact || {};
           const impactSection = document.getElementById('certImpactSection');
           if (imp.size || imp.temp || imp.energy || imp.lateral || imp.shear) {
@@ -407,7 +420,6 @@
         console.error("Error searching JSON database:", e);
       }
 
-      // 3. Show "Not Found" only if neither PDF nor JSON record matched
       if (!foundPdfFiles && !foundJsonRecord) {
         noResBox.classList.remove('hidden');
       } else if (foundPdfFiles) {
@@ -417,7 +429,6 @@
       }
     }
 
-    // Live sync customer custom description input to the printable view
     document.getElementById('customerDescInput').addEventListener('input', function() {
       document.getElementById('lblDescription').innerText = this.value;
     });
