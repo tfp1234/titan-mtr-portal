@@ -359,11 +359,11 @@
         return;
       }
 
-      if (sigPath && sigPath.trim()) {
-        const safeSrc = encodeSignaturePath(sigPath.trim());
-        box.innerHTML = `<img src="${safeSrc}" alt="QC Signature" class="max-h-11 max-w-full object-contain mx-auto">`;
-        return;
-      }
+     if (sigPath && sigPath.trim()) {
+  const safeSrc = encodeSignaturePath(sigPath.trim()) + '?v=' + Date.now();
+  box.innerHTML = `<img src="${safeSrc}" alt="QC Signature" class="max-h-11 max-w-full object-contain mx-auto">`;
+  return;
+}
 
       box.innerHTML = 'Titan QC Dept';
     }
