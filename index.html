@@ -237,7 +237,7 @@
           <p id="lblComments" class="text-[10px] text-gray-600 mt-1 whitespace-pre-line"></p>
         </div>
         <div class="text-center w-1/3 border-l pl-4">
-          <div class="h-12 flex items-center justify-center font-serif italic text-blue-900 font-bold">Titan QC Dept</div>
+          <div id="certSignatureBox" class="h-12 flex items-center justify-center font-serif italic text-blue-900 font-bold">Titan QC Dept</div>
           <p class="border-t border-gray-400 pt-1 text-[10px] font-bold text-gray-700 uppercase">QC MANAGER AND INSPECTOR</p>
         </div>
       </div>
@@ -268,6 +268,23 @@
     const GITHUB_REPO = 'titan-mtr-portal';
     const PDF_FOLDER = 'pdfs';
     const TREE_CACHE_KEY = 'titan_pdfs_tree_cache_v1';
+
+    function encodeSignaturePath(path) {
+      return path.split('/').map(part => encodeURIComponent(part)).join('/');
+    }
+
+    function renderSignatureArea(sigPath) {
+      const box = document.getElementById('certSignatureBox');
+      if (!box) return;
+
+      if (sigPath && typeof sigPath === 'string' && sigPath.trim()) {
+        const safeSrc = encodeSignaturePath(sigPath.trim());
+        box.innerHTML = `<img src="${safeSrc}" alt="QC Signature" class="max-h-11 max-w-full object-contain mx-auto">`;
+        return;
+      }
+
+      box.innerHTML = 'Titan QC Dept';
+    }
 
     async function getPdfFileNamesFromRepo() {
       try {
@@ -316,6 +333,7 @@
       pdfLinksList.innerHTML = '';
       certArea.classList.add('hidden');
       printBar.classList.add('hidden');
+      renderSignatureArea('');
 
       if (!input) return;
 
@@ -375,6 +393,7 @@
           document.getElementById('lblHeatTreatment').innerText = record.heatTreatment || 'N/A';
           document.getElementById('lblDimension').innerText = (record.dimension || '') + ' ' + (record.threads || '');
           document.getElementById('lblComments').innerText = record.comments || '';
+          renderSignatureArea(record.signature || '');
 
           const c = record.chem || {};
           document.getElementById('chemC').innerText = c.c || '-';
