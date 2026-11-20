@@ -81,4 +81,46 @@
   },
   "comments": "Normalized: 920C, Cooling - Air 5 minutes \nHydrotest in Accordance with CSA Z245.1, Holding time 5 Seconds\nMeets NACE MR-0175/MR-0103, ISO 15156-2; 2020\nIn accordance with EN10204 3.1\nMFG - Titan Flow Products, 8524 Roper Road NW, Edmonton AB, T6E6V4"
 }
+{
+  "heat": "9676",
+  "certNo": "MC21031500010",
+  "description": "",
+  "specs": "ASME/ASTM-2019 A420 WPL6-2019 acc. To EN 10204 / DIN 10204 / DIN 50049/3.1 ** NACE MR.0175/0103 Ed.2000/ISO9001:2020/ISO 15156-2, MSS SP-95, SP-25.",
+  "heatTreatment": "Normalizing at 920°, air cooling",
+  "dimension": "ANSI/ASME B1.20.1, WT: ASME B36.10",
+  "threads": "",
+  "chem": {
+    "c": "0.14",
+    "mn": "1.28",
+    "p": "0.022",
+    "s": "0.007",
+    "si": "0.23",
+    "cr": "0.03",
+    "ni": "0.02",
+    "mo": "0.002",
+    "cu": "0.03",
+    "v": "0.003",
+    "al": "0",
+    "ti": "0",
+    "b": "0",
+    "nb": "0",
+    "ce": ".364"
+  },
+  "mech": {
+    "tensile": "519 MPA",
+    "yield": "284 MPA",
+    "elong": "36",
+    "ra": "-",
+    "hardness": "122-135 BHN"
+  },
+  "impact": {
+    "size": "",
+    "temp": "-45C",
+    "energy": "33,44,52",
+    "lateral": "",
+    "shear": ""
+  },
+  "signature": "signatures/PT QC.png",
+  "comments": "Steel making process: Electric Furnace. We certify the above mentioned fittings have been manufactured and tested in accordance with stated specifications indicated above."
+}
 ]
