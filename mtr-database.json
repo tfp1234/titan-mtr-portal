@@ -41,85 +41,86 @@
     "comments": "Hot finished, Normalized 900C\nHydrotest to 20,700Kpa, Holding time 5 Seconds\nMeets NACE MR-0175/MR-0103, ISO 15156-2; 2015\nIn accordance with EN10204 3.1\nMFG - Titan Flow Products, 8524 Roper Road NW, Edmonton AB, T6E6V4"
   },
   {
-  "heat": "T664675",
-  "certNo": "664675",
-  "description": "",
-  "specs": "ASTM-24/ASME-25, A333 Grade 6, CSA Z245.1-22 Gr. 290 CAT II, SS, NACE MR0175/103, MSS-SP25, SP-95. Starting material 1\" S160 A333 Benteler Pipe, Heat number 664675",
-  "heatTreatment": "Normalizing at 920°, air cooling",
-  "dimension": "ASME B16.11 / ANSI B1.20.1",
-  "threads": "",
-  "chem": {
-    "c": "0.131",
-    "mn": "0.74",
-    "p": "0.01",
-    "s": "0.003",
-    "si": "0.231",
-    "cr": "0.13",
-    "ni": "0.14",
-    "mo": "0.04",
-    "cu": "0.13",
-    "v": "0.002",
-    "al": "-",
-    "ti": "0.001",
-    "b": "0.0002",
-    "nb": "0.01",
-    "ce": "0.28"
+    "heat": "T664675",
+    "certNo": "664675",
+    "description": "",
+    "specs": "ASTM-24/ASME-25, A333 Grade 6, CSA Z245.1-22 Gr. 290 CAT II, SS, NACE MR0175/103, MSS-SP25, SP-95. Starting material 1\" S160 A333 Benteler Pipe, Heat number 664675",
+    "heatTreatment": "Normalizing at 920°, air cooling",
+    "dimension": "ASME B16.11 / ANSI B1.20.1",
+    "threads": "",
+    "chem": {
+      "c": "0.131",
+      "mn": "0.74",
+      "p": "0.01",
+      "s": "0.003",
+      "si": "0.231",
+      "cr": "0.13",
+      "ni": "0.14",
+      "mo": "0.04",
+      "cu": "0.13",
+      "v": "0.002",
+      "al": "-",
+      "ti": "0.001",
+      "b": "0.0002",
+      "nb": "0.01",
+      "ce": "0.28"
+    },
+    "mech": {
+      "tensile": "71794 PSI",
+      "yield": "50183 PSI",
+      "elong": "54",
+      "ra": "-",
+      "hardness": "150 HB"
+    },
+    "impact": {
+      "size": "55x7x10",
+      "temp": "-50F",
+      "energy": "91,95,88",
+      "lateral": "34,34,34",
+      "shear": "99,99,99"
+    },
+    "comments": "Normalized: 920C, Cooling - Air 5 minutes \nHydrotest in Accordance with CSA Z245.1, Holding time 5 Seconds\nMeets NACE MR-0175/MR-0103, ISO 15156-2; 2020\nIn accordance with EN10204 3.1\nMFG - Titan Flow Products, 8524 Roper Road NW, Edmonton AB, T6E6V4"
   },
-  "mech": {
-    "tensile": "71794 PSI",
-    "yield": "50183 PSI",
-    "elong": "54",
-    "ra": "-",
-    "hardness": "150 HB"
-  },
-  "impact": {
-    "size": "55x7x10",
-    "temp": "-50F",
-    "energy": "91,95,88",
-    "lateral": "34,34,34",
-    "shear": "99,99,99"
-  },
-  "comments": "Normalized: 920C, Cooling - Air 5 minutes \nHydrotest in Accordance with CSA Z245.1, Holding time 5 Seconds\nMeets NACE MR-0175/MR-0103, ISO 15156-2; 2020\nIn accordance with EN10204 3.1\nMFG - Titan Flow Products, 8524 Roper Road NW, Edmonton AB, T6E6V4"
-}
-{
-  "heat": "9676",
-  "certNo": "MC21031500010",
-  "description": "",
-  "specs": "ASME/ASTM-2019 A420 WPL6-2019 acc. To EN 10204 / DIN 10204 / DIN 50049/3.1 ** NACE MR.0175/0103 Ed.2000/ISO9001:2020/ISO 15156-2, MSS SP-95, SP-25.",
-  "heatTreatment": "Normalizing at 920°, air cooling",
-  "dimension": "ANSI/ASME B1.20.1, WT: ASME B36.10",
-  "threads": "",
-  "chem": {
-    "c": "0.14",
-    "mn": "1.28",
-    "p": "0.022",
-    "s": "0.007",
-    "si": "0.23",
-    "cr": "0.03",
-    "ni": "0.02",
-    "mo": "0.002",
-    "cu": "0.03",
-    "v": "0.003",
-    "al": "0",
-    "ti": "0",
-    "b": "0",
-    "nb": "0",
-    "ce": ".364"
-  },
-  "mech": {
-    "tensile": "519 MPA",
-    "yield": "284 MPA",
-    "elong": "36",
-    "ra": "-",
-    "hardness": "122-135 BHN"
-  },
-  "impact": {
-    "size": "",
-    "temp": "-45C",
-    "energy": "33,44,52",
-    "lateral": "",
-    "shear": ""
-  },
-  "signature": "signatures/PT QC.png",
-  "comments": "Steel making process: Electric Furnace. We certify the above mentioned fittings have been manufactured and tested in accordance within the stated specifications indicated above Unless otherwise specified, all material contained within this MTR meets all requirements of, and are mulitple-certified to, all material specifications listed and NACE MR0175-2015 Charpy samples shall be prepared in the longitudinal direction Values given are for full-size {10 mm x 10 mm) Charpy samples CRN: 0A162530.52 MFG: JIANGSU HAIDA PIPE FITTINGS GROUP CO.,LTD 江苏海达管件集团有限公司 EASTERN GUANHUA ROAD 6666 JIANHU COUNTY ,YANCHENG CITY JIANGSU PROVINCE,CHINA"
-}
+  {
+    "heat": "9676",
+    "certNo": "MC21031500010",
+    "description": "",
+    "specs": "ASME/ASTM-2019 A420 WPL6-2019 acc. To EN 10204 / DIN 10204 / DIN 50049/3.1 ** NACE MR.0175/0103 Ed.2000/ISO9001:2020/ISO 15156-2, MSS SP-95, SP-25.",
+    "heatTreatment": "Normalizing at 920°, air cooling",
+    "dimension": "ANSI/ASME B1.20.1, WT: ASME B36.10",
+    "threads": "",
+    "chem": {
+      "c": "0.14",
+      "mn": "1.28",
+      "p": "0.022",
+      "s": "0.007",
+      "si": "0.23",
+      "cr": "0.03",
+      "ni": "0.02",
+      "mo": "0.002",
+      "cu": "0.03",
+      "v": "0.003",
+      "al": "0",
+      "ti": "0",
+      "b": "0",
+      "nb": "0",
+      "ce": ".364"
+    },
+    "mech": {
+      "tensile": "519 MPA",
+      "yield": "284 MPA",
+      "elong": "36",
+      "ra": "-",
+      "hardness": "122-135 BHN"
+    },
+    "impact": {
+      "size": "",
+      "temp": "-45C",
+      "energy": "33,44,52",
+      "lateral": "",
+      "shear": ""
+    },
+    "signature": "signatures/PT QC.png",
+    "comments": "Steel making process: Electric Furnace. We certify the above mentioned fittings have been manufactured and tested in accordance within the stated specifications indicated above Unless otherwise specified, all material contained within this MTR meets all requirements of, and are mulitple-certified to, all material specifications listed and NACE MR0175-2015 Charpy samples shall be prepared in the longitudinal direction Values given are for full-size {10 mm x 10 mm) Charpy samples CRN: 0A162530.52 MFG: JIANGSU HAIDA PIPE FITTINGS GROUP CO.,LTD 江苏海达管件集团有限公司 EASTERN GUANHUA ROAD 6666 JIANHU COUNTY ,YANCHENG CITY JIANGSU PROVINCE,CHINA"
+  }
+]
