@@ -131,6 +131,29 @@
           </div>
         </div>
 
+        <!-- QC / QA Signature Selection -->
+        <div class="sm:col-span-2 border-t pt-3 bg-gray-50 p-3 rounded border border-gray-200">
+          <p class="font-bold text-gray-800 mb-2 uppercase">QC / QA Signature Image:</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block font-bold text-gray-700 mb-1">Select Signature from `signatures/` Folder:</label>
+              <select id="mSignature" onchange="handleSignatureSelectChange()" class="w-full border rounded p-2 bg-white font-mono text-xs">
+                <option value="">Default Text (Titan QC Dept)</option>
+                <option value="signatures/DALIAN QC.png">DALIAN QC.png</option>
+                <option value="signatures/LIANFA QC.png">LIANFA QC.png</option>
+                <option value="signatures/PT QC.png">PT QC.png</option>
+                <option value="signatures/SOTURI CHINA QC.png">SOTURI CHINA QC.png</option>
+                <option value="signatures/TITAN QC.png">TITAN QC.png</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold text-gray-700 mb-1">Or Choose Local Image File to Preview:</label>
+              <input type="file" id="mSignatureUpload" accept="image/png,image/jpeg,image/webp" onchange="handleSignatureFileUpload(event)" class="w-full border rounded p-1.5 bg-white text-xs">
+              <p id="sigUploadNote" class="text-[10px] text-gray-500 mt-1">If you pick a file here, make sure it is uploaded to `signatures/` in GitHub so `mtr-database.json` links to it.</p>
+            </div>
+          </div>
+        </div>
+
         <div class="sm:col-span-2 border-t pt-3">
           <label class="block font-bold text-gray-700 mb-1">Additional Comments:</label>
           <textarea id="mComments" rows="2" class="w-full border rounded p-2 text-xs">Steel making process: Electric Furnace. We certify the above mentioned fittings have been manufactured and tested in accordance with stated specifications indicated above.</textarea>
@@ -308,7 +331,7 @@
           <p id="lblComments" class="text-[10px] text-gray-600 mt-1 whitespace-pre-line"></p>
         </div>
         <div class="text-center w-1/3 border-l pl-4">
-          <div class="h-12 flex items-center justify-center font-serif italic text-blue-900 font-bold">Titan QC Dept</div>
+          <div id="certSignatureBox" class="h-12 flex items-center justify-center font-serif italic text-blue-900 font-bold">Titan QC Dept</div>
           <p class="border-t border-gray-400 pt-1 text-[10px] font-bold text-gray-700 uppercase">QC MANAGER AND INSPECTOR</p>
         </div>
       </div>
@@ -320,6 +343,70 @@
   </main>
 
   <script>
+    let uploadedSignaturePreviewUrl = '';
+    let uploadedSignatureFileName = '';
+
+    function encodeSignaturePath(path) {
+      return path.split('/').map(part => encodeURIComponent(part)).join('/');
+    }
+
+    function renderSignatureArea(sigPath, previewDataUrl) {
+      const box = document.getElementById('certSignatureBox');
+      if (!box) return;
+
+      if (previewDataUrl) {
+        box.innerHTML = `<img src="${previewDataUrl}" alt="QC Signature" class="max-h-11 max-w-full object-contain mx-auto">`;
+        return;
+      }
+
+      if (sigPath && sigPath.trim()) {
+        const safeSrc = encodeSignaturePath(sigPath.trim());
+        box.innerHTML = `<img src="${safeSrc}" alt="QC Signature" class="max-h-11 max-w-full object-contain mx-auto">`;
+        return;
+      }
+
+      box.innerHTML = 'Titan QC Dept';
+    }
+
+    function handleSignatureSelectChange() {
+      const selectEl = document.getElementById('mSignature');
+      const noteEl = document.getElementById('sigUploadNote');
+      uploadedSignaturePreviewUrl = '';
+      uploadedSignatureFileName = '';
+      if (noteEl && selectEl && selectEl.value) {
+        noteEl.textContent = `Selected repo path: ${selectEl.value}`;
+      } else if (noteEl) {
+        noteEl.textContent = "If you pick a file here, make sure it is uploaded to `signatures/` in GitHub so `mtr-database.json` links to it.";
+      }
+      renderSignatureArea(selectEl ? selectEl.value : '', '');
+    }
+
+    function handleSignatureFileUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      const selectEl = document.getElementById('mSignature');
+      const noteEl = document.getElementById('sigUploadNote');
+      if (!file) return;
+
+      uploadedSignatureFileName = file.name;
+      const candidatePath = `signatures/${file.name}`;
+      if (selectEl) {
+        const matchingOption = Array.from(selectEl.options).find(opt => opt.value.toLowerCase() === candidatePath.toLowerCase());
+        if (matchingOption) {
+          selectEl.value = matchingOption.value;
+        }
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        uploadedSignaturePreviewUrl = e.target.result;
+        if (noteEl) {
+          noteEl.textContent = `Previewing local file "${file.name}". Saved JSON will reference "signatures/${file.name}".`;
+        }
+        renderSignatureArea(candidatePath, uploadedSignaturePreviewUrl);
+      };
+      reader.readAsDataURL(file);
+    }
+
     async function performSearch() {
       const input = document.getElementById('searchInput').value.trim().toUpperCase();
       const noResBox = document.getElementById('noResults');
@@ -373,6 +460,13 @@
         document.getElementById('mImpEnergy').value = imp.energy || '';
         document.getElementById('mImpLat').value = imp.lateral || '';
         document.getElementById('mImpShear').value = imp.shear || '';
+
+        uploadedSignaturePreviewUrl = '';
+        uploadedSignatureFileName = '';
+        const sigSelect = document.getElementById('mSignature');
+        if (sigSelect) {
+          sigSelect.value = record.signature || '';
+        }
 
         document.getElementById('mComments').value = record.comments || '';
         generateManualCertificate();
@@ -436,6 +530,10 @@
           impactSection.classList.add('hidden');
         }
 
+        const sigSelect = document.getElementById('mSignature');
+        const selectedSig = sigSelect ? sigSelect.value : '';
+        renderSignatureArea(selectedSig, uploadedSignaturePreviewUrl);
+
         document.getElementById('lblComments').innerText = getVal('mComments', '');
         const certBox = document.getElementById('printable-certificate');
         const toolbar = document.getElementById('actionToolbar');
@@ -452,6 +550,12 @@
       if (!heatVal) {
         alert("Please enter a Heat Code before generating JSON.");
         return;
+      }
+
+      const sigSelect = document.getElementById('mSignature');
+      let sigPath = sigSelect ? sigSelect.value.trim() : '';
+      if (!sigPath && uploadedSignatureFileName) {
+        sigPath = `signatures/${uploadedSignatureFileName}`;
       }
 
       const record = {
@@ -493,6 +597,7 @@
           "lateral": document.getElementById('mImpLat').value.trim(),
           "shear": document.getElementById('mImpShear').value.trim()
         },
+        "signature": sigPath,
         "comments": document.getElementById('mComments').value.trim()
       };
 
