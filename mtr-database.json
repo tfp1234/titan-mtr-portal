@@ -290,5 +290,47 @@
   },
   "signature": "",
   "comments": "Normalized: 920C, Cooling - Air 5 minutes \nHydrotest in Accordance with CSA Z245.1, Holding time 5 Seconds\nMeets NACE MR-0175/MR-0103, ISO 15156-2; 2020\nIn accordance with EN10204 3.1\nMFG - Titan Flow Products, 8524 Roper Road NW, Edmonton AB, T6E6V4"
+},
+  {
+  "heat": "TM253",
+  "certNo": "M2534038",
+  "description": "",
+  "specs": "ASTM A 106 GR. B-19a / ASME SA 106 GR. B / NACE MR 0175:2021 / NACE MR 0103:2015 / ISO 15156-2:2020 / ISO 17945:2015 & CSA Z245.1-2022 CAT II SS M45C GRADE 359",
+  "heatTreatment": "Normalizing at 900°, air cooling",
+  "dimension": "ASME B16.11 / ANSI B1.20.1",
+  "threads": "",
+  "chem": {
+    "c": "0.13",
+    "mn": "1.28",
+    "p": "0.015",
+    "s": "0.007",
+    "si": "0.34",
+    "cr": "0.07",
+    "ni": "0.06",
+    "mo": "0.06",
+    "cu": "0.11",
+    "v": "0.06",
+    "al": "0.036",
+    "ti": "<0.01",
+    "b": "<0.001",
+    "nb": "<0.01",
+    "ce": "0.35"
+  },
+  "mech": {
+    "tensile": "540 MPA",
+    "yield": "393 MPA",
+    "elong": "35",
+    "ra": "-",
+    "hardness": "156-156 HB"
+  },
+  "impact": {
+    "size": "",
+    "temp": "",
+    "energy": "",
+    "lateral": "",
+    "shear": ""
+  },
+  "signature": "",
+  "comments": "Certification: In accordance with EN 10204 - 3.1\t\t\t\t\t\t\t\nHeat Treatment: Hot finished, Normalized at 900°C (± 10°C) and cooled in air\t\t\t\t\t\t\t\nSteelmaking Process: EAF-LRF-VD-CCM, Fully Killed Steel\t\t\t\t\t\t\t\nHydro (PSI): 3,000 PSI (20.7 MPa) held for 10 Seconds minimum (100% tested)\t\t\t\t\t\t\t\nUT as per ASTM E 213 with Notch depth 10% of WT (NWT) found Satisfactory\t\t\t\t\t\t\t\nPipe country of Origin: Jindal Saw Limited (Sinnar, Nashik, Maharashtra, India)\t\t\t\t\t\t\t\nMFG - Titan Flow Products, 8524 Roper Road NW, Edmonton AB, T6E6V4"
 }
 ]
