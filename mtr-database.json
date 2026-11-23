@@ -127,7 +127,7 @@
   "heat": "TM253",
   "certNo": "M2534038",
   "description": "",
-  "specs": "ASME SA 333 GR. 6 (ASME SEC II PART A EDN. 2025) / ASTM A 333 GR. 6-24 / NACE MR 0175:2021 / NACE MR 0103:2015 / ISO 15156-2:2020 / ISO 17945:2015 & CSA Z245.1-2022 CAT II SS M45C GRADE 359",
+  "specs": "ASTM A 106 GR. B-19a / ASME SA 106 GR. B / ASME SA 333 GR. 6 (ASME SEC II PART A EDN. 2025) / ASTM A 333 GR. 6-24 / NACE MR 0175:2021 / NACE MR 0103:2015 / ISO 15156-2:2020 / ISO 17945:2015 & CSA Z245.1-2022 CAT II SS M45C GRADE 359",
   "heatTreatment": "Normalizing at 900°, air cooling",
   "dimension": "ASME B16.11 / ANSI B1.20.1",
   "threads": "",
