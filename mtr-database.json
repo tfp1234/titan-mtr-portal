@@ -206,5 +206,47 @@
   },
   "signature": "signatures/PT QC.png",
   "comments": "Steel making process: Electric Furnace  \nWe certify the above mentioned fittings have been manufactured and tested in accordance within the\nstated specifications indicated above.\nUnless otherwise specified, all material contained within this MTR meets all requirements of, and are \nmulitple-certified to, all material specifications listed and NACE MR0175-2015\nCharpy samples shall be prepared in the longitudinal direction\nValues given are for full-size {10 mm x 10 mm) Charpy samples.\nFully killed\nCRN: 0A162530.52\nMFG: JIANGSU HAIDA PIPE FITTINGS GROUP CO.,LTD 江苏海达管件集团有限公司\nEASTERN GUANHUA ROAD 6666 JIANHU COUNTY ,YANCHENG CITY JIANGSU PROVINCE,CHINA"
+},
+  {
+  "heat": "T642576",
+  "certNo": "642576",
+  "description": "",
+  "specs": "ASTM/ASME-21 A106B Grade 6, CSA Z245.1-18 GR.359 CAT II, SS, NACE MR0175/103, MSS-SP25, SP-95. Starting material 1/2\" S80 A106 PIPE",
+  "heatTreatment": "Normalizing at 900°, air cooling",
+  "dimension": "ASME B16.11 / ANSI B1.20.1",
+  "threads": "",
+  "chem": {
+    "c": "0.12",
+    "mn": "1.24",
+    "p": "0.01",
+    "s": "0.002",
+    "si": "0.31",
+    "cr": "0.16",
+    "ni": "0.22",
+    "mo": "0.05",
+    "cu": "0.16",
+    "v": "0.065",
+    "al": "0",
+    "ti": "0.002",
+    "b": "0.0004",
+    "nb": "0.013",
+    "ce": ".407"
+  },
+  "mech": {
+    "tensile": "78756 PSI",
+    "yield": "58160 PSI",
+    "elong": "40",
+    "ra": "-",
+    "hardness": "-"
+  },
+  "impact": {
+    "size": "",
+    "temp": "",
+    "energy": "",
+    "lateral": "",
+    "shear": ""
+  },
+  "signature": "",
+  "comments": "Hot finished, Normalized 900C\t\t\t\t\t\t\t\nHydrotest to 20,700Kpa, Holding time 5 Seconds\t\t\t\t\t\t\t\nMeets NACE MR-0175/MR-0103, ISO 15156-2; 2015\t\t\t\t\t\t\t\nIn accordance with EN10204 3.1\t\t\t\t\t\t\t\nMFG - Titan Flow Products, 8524 Roper Road NW, Edmonton AB, T6E6V4"
 }
 ]
