@@ -66,6 +66,12 @@
       <p class="text-xs text-amber-800">Please verify the heat number stamped on your component or contact Titan Flow Products at <strong>(587) 410-8373</strong>.</p>
     </div>
 
+    <!-- Multiple Spec Matches Selector (Hidden unless >1 record matches) -->
+    <div id="multiSpecSelector" class="hidden bg-white rounded-lg shadow-md p-4 mb-6 no-print border-l-4 border-[#1B365D]">
+      <p class="font-bold text-[#1B365D] text-xs mb-2">Multiple MTR specifications found for this Heat Code — select the one you need:</p>
+      <div id="multiSpecButtons" class="flex flex-wrap gap-2"></div>
+    </div>
+
     <!-- Pre-Created PDF Matches Box (Hidden initially) -->
     <div id="pdfResultsArea" class="hidden bg-white rounded-lg shadow-md p-6 mb-8 no-print border-l-4 border-green-600">
       <div class="flex items-center justify-between mb-3">
@@ -97,13 +103,13 @@
       <div class="mb-4 no-print bg-blue-50 border border-blue-200 p-3 rounded">
         <label class="block font-bold text-blue-900 text-[11px] mb-1">Custom Purchase Order / Line Item Description (Optional):</label>
         <p class="text-[10px] text-blue-700 mb-2">You can type or adjust your project description below before printing or saving your certificate:</p>
-        <input type="text" id="customerDescInput" class="w-full border border-blue-300 rounded p-2 bg-white font-bold text-gray-900 text-xs shadow-inner">
+        <input type="text" id="customerDescInput" placeholder="Type product description for your certificate..." class="w-full border border-blue-300 rounded p-2 bg-white font-bold text-gray-900 text-xs shadow-inner">
       </div>
 
       <!-- Product Description Display for Print -->
       <div class="mb-4">
         <p class="text-[10px] font-bold text-gray-500 uppercase">Product Description:</p>
-        <div id="lblDescription" class="border border-gray-400 p-2 font-bold text-gray-900 mt-0.5 bg-gray-50"></div>
+        <div id="lblDescription" class="border border-gray-400 p-2 min-h-[28px] font-bold text-gray-900 mt-0.5 bg-gray-50"></div>
       </div>
 
       <!-- Specs & Heat Code Grid -->
@@ -286,6 +292,62 @@
       box.innerHTML = 'Titan QC Dept';
     }
 
+    function renderCertificateRecord(record) {
+      const certArea = document.getElementById('printable-area');
+      const printBar = document.getElementById('printActionBar');
+
+      document.getElementById('lblCertNo').innerText = record.certNo || 'N/A';
+      document.getElementById('lblHeat').innerText = record.heat || 'N/A';
+      const initialDesc = record.description || '';
+      document.getElementById('lblDescription').innerText = initialDesc;
+      document.getElementById('customerDescInput').value = initialDesc;
+      document.getElementById('lblSpecs').innerText = record.specs || 'N/A';
+      document.getElementById('lblHeatTreatment').innerText = record.heatTreatment || 'N/A';
+      document.getElementById('lblDimension').innerText = ((record.dimension || '') + ' ' + (record.threads || '')).trim() || 'N/A';
+      document.getElementById('lblComments').innerText = record.comments || '';
+      renderSignatureArea(record.signature || '');
+
+      const c = record.chem || {};
+      document.getElementById('chemC').innerText = c.c || '-';
+      document.getElementById('chemMn').innerText = c.mn || '-';
+      document.getElementById('chemP').innerText = c.p || '-';
+      document.getElementById('chemS').innerText = c.s || '-';
+      document.getElementById('chemSi').innerText = c.si || '-';
+      document.getElementById('chemCr').innerText = c.cr || '-';
+      document.getElementById('chemNi').innerText = c.ni || '-';
+      document.getElementById('chemMo').innerText = c.mo || '-';
+      document.getElementById('chemCu').innerText = c.cu || '-';
+      document.getElementById('chemV').innerText = c.v || '-';
+      document.getElementById('chemAl').innerText = c.al || '-';
+      document.getElementById('chemTi').innerText = c.ti || '-';
+      document.getElementById('chemB').innerText = c.b || '-';
+      document.getElementById('chemNb').innerText = c.nb || '-';
+      document.getElementById('chemCe').innerText = c.ce || '-';
+
+      const m = record.mech || {};
+      document.getElementById('mechTensile').innerText = m.tensile || '-';
+      document.getElementById('mechYield').innerText = m.yield || '-';
+      document.getElementById('mechElong').innerText = m.elong || '-';
+      document.getElementById('mechRa').innerText = m.ra || '-';
+      document.getElementById('mechHardness').innerText = m.hardness || '-';
+
+      const imp = record.impact || {};
+      const impactSection = document.getElementById('certImpactSection');
+      if (imp.size || imp.temp || imp.energy || imp.lateral || imp.shear) {
+        impactSection.classList.remove('hidden');
+        document.getElementById('certImpSize').innerText = imp.size || '-';
+        document.getElementById('certImpTemp').innerText = imp.temp || '-';
+        document.getElementById('certImpEnergy').innerText = imp.energy || '-';
+        document.getElementById('certImpLat').innerText = imp.lateral || '-';
+        document.getElementById('certImpShear').innerText = imp.shear || '-';
+      } else {
+        impactSection.classList.add('hidden');
+      }
+
+      certArea.classList.remove('hidden');
+      printBar.classList.remove('hidden');
+    }
+
     async function getPdfFileNamesFromRepo() {
       try {
         const cached = sessionStorage.getItem(TREE_CACHE_KEY);
@@ -323,12 +385,16 @@
     async function searchMTR() {
       const input = document.getElementById('searchInput').value.trim().toUpperCase();
       const noResBox = document.getElementById('noResults');
+      const multiBox = document.getElementById('multiSpecSelector');
+      const multiButtons = document.getElementById('multiSpecButtons');
       const pdfArea = document.getElementById('pdfResultsArea');
       const pdfLinksList = document.getElementById('pdfLinksList');
       const certArea = document.getElementById('printable-area');
       const printBar = document.getElementById('printActionBar');
 
       noResBox.classList.add('hidden');
+      multiBox.classList.add('hidden');
+      multiButtons.innerHTML = '';
       pdfArea.classList.add('hidden');
       pdfLinksList.innerHTML = '';
       certArea.classList.add('hidden');
@@ -380,60 +446,27 @@
       try {
         const response = await fetch('mtr-database.json?v=' + Date.now());
         const db = response.ok ? await response.json() : [];
-        const record = db.find(item => item.heat && item.heat.toUpperCase() === input);
+        const matches = Array.isArray(db)
+          ? db.filter(item => item && item.heat && String(item.heat).trim().toUpperCase() === input)
+          : [];
 
-        if (record) {
+        if (matches.length > 0) {
           foundJsonRecord = true;
+          renderCertificateRecord(matches[0]);
 
-          if (record.certNo) document.getElementById('lblCertNo').innerText = record.certNo;
-          document.getElementById('lblHeat').innerText = record.heat || 'N/A';
-          document.getElementById('lblDescription').innerText = record.description || 'N/A';
-          document.getElementById('customerDescInput').value = record.description || '';
-          document.getElementById('lblSpecs').innerText = record.specs || 'N/A';
-          document.getElementById('lblHeatTreatment').innerText = record.heatTreatment || 'N/A';
-          document.getElementById('lblDimension').innerText = (record.dimension || '') + ' ' + (record.threads || '');
-          document.getElementById('lblComments').innerText = record.comments || '';
-          renderSignatureArea(record.signature || '');
-
-          const c = record.chem || {};
-          document.getElementById('chemC').innerText = c.c || '-';
-          document.getElementById('chemMn').innerText = c.mn || '-';
-          document.getElementById('chemP').innerText = c.p || '-';
-          document.getElementById('chemS').innerText = c.s || '-';
-          document.getElementById('chemSi').innerText = c.si || '-';
-          document.getElementById('chemCr').innerText = c.cr || '-';
-          document.getElementById('chemNi').innerText = c.ni || '-';
-          document.getElementById('chemMo').innerText = c.mo || '-';
-          document.getElementById('chemCu').innerText = c.cu || '-';
-          document.getElementById('chemV').innerText = c.v || '-';
-          document.getElementById('chemAl').innerText = c.al || '-';
-          document.getElementById('chemTi').innerText = c.ti || '-';
-          document.getElementById('chemB').innerText = c.b || '-';
-          document.getElementById('chemNb').innerText = c.nb || '-';
-          document.getElementById('chemCe').innerText = c.ce || '-';
-
-          const m = record.mech || {};
-          document.getElementById('mechTensile').innerText = m.tensile || '-';
-          document.getElementById('mechYield').innerText = m.yield || '-';
-          document.getElementById('mechElong').innerText = m.elong || '-';
-          document.getElementById('mechRa').innerText = m.ra || '-';
-          document.getElementById('mechHardness').innerText = m.hardness || '-';
-
-          const imp = record.impact || {};
-          const impactSection = document.getElementById('certImpactSection');
-          if (imp.size || imp.temp || imp.energy || imp.lateral || imp.shear) {
-            impactSection.classList.remove('hidden');
-            document.getElementById('certImpSize').innerText = imp.size || '-';
-            document.getElementById('certImpTemp').innerText = imp.temp || '-';
-            document.getElementById('certImpEnergy').innerText = imp.energy || '-';
-            document.getElementById('certImpLat').innerText = imp.lateral || '-';
-            document.getElementById('certImpShear').innerText = imp.shear || '-';
-          } else {
-            impactSection.classList.add('hidden');
+          if (matches.length > 1) {
+            matches.forEach((rec, idx) => {
+              const btn = document.createElement('button');
+              btn.type = 'button';
+              const specLabel = rec.specs ? rec.specs.split(',')[0].slice(0, 45) : `Option ${idx + 1}`;
+              const certLabel = rec.certNo ? ` (${rec.certNo})` : '';
+              btn.className = 'bg-blue-50 hover:bg-blue-100 border border-blue-300 text-[#1B365D] font-semibold px-3 py-1.5 rounded text-xs transition';
+              btn.innerText = `${specLabel}${certLabel}`;
+              btn.onclick = () => renderCertificateRecord(rec);
+              multiButtons.appendChild(btn);
+            });
+            multiBox.classList.remove('hidden');
           }
-
-          certArea.classList.remove('hidden');
-          printBar.classList.remove('hidden');
         }
       } catch (e) {
         console.error("Error searching JSON database:", e);
